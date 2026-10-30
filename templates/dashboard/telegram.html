@@ -1,0 +1,1569 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Интеграция Telegram & QR-код | Учебный Центр CRM</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        /* ═══════════════════════════════════════════════════
+           🎨 UNIFIED ADMIN THEME — Оқ фон, Замонавий
+           ═══════════════════════════════════════════════════ */
+        :root {
+            --bg:        #f5f6fa;
+            --surface:   #ffffff;
+            --border:    #e5e7eb;
+            --primary:   #2563eb;
+            --primary-h: #1d4ed8;
+            --text:      #111827;
+            --text-2:    #6b7280;
+            --text-3:    #9ca3af;
+            --shadow-sm: 0 1px 3px 0 rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 16px -2px rgba(0,0,0,0.1);
+            --radius:    14px;
+            --radius-sm: 9px;
+        }
+        *, *::before, *::after { box-sizing: border-box; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+            margin: 0; padding: 0;
+        }
+        /* ── HEADER ── */
+        .dash-header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 0;
+            box-shadow: var(--shadow-sm);
+            position: sticky; top: 0; z-index: 100;
+        }
+        .dash-header-inner {
+            max-width: 1400px; margin: 0 auto; padding: 0 24px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .dash-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .dash-logo-icon {
+            width: 38px; height: 38px; border-radius: 10px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; color: #0f172a; flex-shrink: 0;
+        }
+        .dash-logo-text { font-size: 15px; font-weight: 800; color: var(--text); line-height: 1.2; }
+        .dash-logo-sub { font-size: 11px; color: var(--text-2); font-weight: 500; }
+        .dash-header-actions { display: flex; align-items: center; gap: 10px; }
+        .btn-hdr {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 8px 14px; border-radius: 9px; font-size: 13px; font-weight: 600;
+            text-decoration: none; border: 1px solid var(--border);
+            background: var(--surface); color: var(--text-2); cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .btn-hdr:hover { background: var(--bg); color: var(--text); }
+        .btn-hdr-danger { background: #fff0f0; border-color: #fecaca; color: #ef4444; }
+        .btn-hdr-danger:hover { background: #fee2e2; border-color: #ef4444; }
+        /* ── CONTAINER ── */
+        .dash-container { max-width: 1400px; margin: 0 auto; padding: 24px 24px 40px; }
+        /* ── NAV ROWS ── */
+        .dash-nav { display: flex; flex-direction: column; gap: 6px; margin-bottom: 24px; }
+        .dash-nav-row {
+            display: flex; gap: 4px;
+            background: var(--surface); padding: 5px;
+            border-radius: var(--radius); border: 1px solid var(--border);
+            overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none;
+        }
+        .dash-nav-row::-webkit-scrollbar { display: none; }
+        .dash-nav-label {
+            font-size: 10px; font-weight: 700; color: var(--text-3);
+            text-transform: uppercase; letter-spacing: 0.6px;
+            padding: 2px 8px; align-self: center; flex-shrink: 0;
+        }
+        .nav-divider { width: 1px; background: var(--border); margin: 4px 2px; flex-shrink: 0; }
+        .dash-tab {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 7px 13px; border-radius: var(--radius-sm);
+            font-size: 13px; font-weight: 600; color: var(--text-2);
+            text-decoration: none; white-space: nowrap; flex-shrink: 0;
+            transition: all 0.15s ease; border: 1px solid transparent;
+        }
+        .dash-tab:hover { background: var(--bg); color: var(--text); }
+        .dash-tab.active { background: var(--primary); color: #0f172a; box-shadow: 0 3px 10px rgba(37,99,235,0.3); }
+        .dash-tab.active-tg { background: #0284c7; color: #0f172a; box-shadow: 0 3px 10px rgba(2,132,199,0.3); }
+        .dash-tab.active-ig { background: linear-gradient(135deg,#c13584,#e1306c); color: #0f172a; box-shadow: 0 3px 10px rgba(225,48,108,0.3); }
+        .tab-badge {
+            background: rgba(0,0,0,0.1); padding: 1px 6px; border-radius: 20px; font-size: 11px; font-weight: 700;
+        }
+        .dash-tab.active .tab-badge, .dash-tab.active-tg .tab-badge, .dash-tab.active-ig .tab-badge {
+            background: rgba(255,255,255,0.25);
+        }
+        /* ── PANELS ── */
+        .panel-box {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 24px;
+            box-shadow: var(--shadow-sm); margin-bottom: 20px;
+        }
+        .panel-title {
+            font-size: 17px; font-weight: 700; color: var(--text);
+            margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between;
+        }
+        /* ── STAT CARDS ── */
+        .dash-stats-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 16px; margin-bottom: 24px; }
+        .stat-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 20px;
+            display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow-sm);
+        }
+        .stat-card-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+        .icon-blue   { background: #eff6ff; color: #2563eb; }
+        .icon-green  { background: #f0fdf4; color: #16a34a; }
+        .icon-amber  { background: #fffbeb; color: #d97706; }
+        .icon-purple { background: #faf5ff; color: #7c3aed; }
+        .icon-red    { background: #fff1f2; color: #e11d48; }
+        .icon-wa     { background: #f0fdf4; color: #16a34a; }
+        .stat-card h3 { font-size: 22px; font-weight: 800; margin: 0 0 2px; color: var(--text); }
+        .stat-card p  { font-size: 13px; color: var(--text-2); margin: 0; }
+        /* ── TABLE ── */
+        .leads-table-wrapper { overflow-x: auto; border-radius: 10px; border: 1px solid var(--border); }
+        .leads-table { width: 100%; border-collapse: collapse; text-align: left; min-width: 700px; }
+        .leads-table th { padding: 12px 14px; background: #f9fafb; color: var(--text-2); font-size: 12px; font-weight: 700; border-bottom: 1px solid var(--border); white-space: nowrap; text-transform: uppercase; letter-spacing: 0.4px; }
+        .leads-table td { padding: 14px; border-bottom: 1px solid #f3f4f6; font-size: 13.5px; vertical-align: middle; color: var(--text); }
+        .leads-table tr:last-child td { border-bottom: none; }
+        .leads-table tr:hover td { background: #fafafa; }
+        /* ── STATUS BADGES ── */
+        .status-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 11px; border-radius: 9999px; font-size: 12px; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
+        .status-new       { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+        .status-progress  { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+        .status-paid      { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+        .status-cancelled { background: #fff1f2; color: #e11d48; border: 1px solid #fecdd3; }
+        /* ── ACTION BUTTONS ── */
+        .table-actions { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+        .btn-table-action {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600;
+            background: #f8fafc; border: 1px solid var(--border); color: var(--text);
+            cursor: pointer; text-decoration: none; transition: all 0.15s ease; white-space: nowrap;
+        }
+        .btn-table-action:hover { background: #f1f5f9; border-color: #cbd5e1; }
+        .btn-table-danger {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 30px; height: 30px; border-radius: 8px;
+            background: #fff1f2; border: 1px solid #fecdd3; color: #e11d48;
+            cursor: pointer; text-decoration: none; transition: all 0.15s ease; flex-shrink: 0;
+        }
+        .btn-table-danger:hover { background: #fee2e2; border-color: #fca5a5; }
+        /* ── FORMS ── */
+        .form-input, .form-textarea, .form-select {
+            width: 100%; background: #f9fafb; border: 1px solid var(--border);
+            border-radius: 9px; color: var(--text); padding: 10px 14px;
+            font-size: 13.5px; outline: none; box-sizing: border-box;
+            font-family: inherit; transition: all 0.15s ease;
+        }
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.12); background: #fff;
+        }
+        .form-label { display: block; font-size: 12px; font-weight: 700; color: var(--text-2); margin-bottom: 6px; }
+        .form-group { margin-bottom: 14px; }
+        /* ── BUTTONS ── */
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 9px; font-size: 13.5px; font-weight: 700; border: none; cursor: pointer; text-decoration: none; transition: all 0.15s ease; white-space: nowrap; }
+        .btn-primary { background: var(--primary); color: #0f172a; }
+        .btn-primary:hover { background: var(--primary-h); }
+        .btn-outline { background: #fff; color: var(--text); border: 1px solid var(--border); }
+        .btn-outline:hover { background: var(--bg); }
+        .btn-accent { background: #10b981; color: #0f172a; }
+        .btn-accent:hover { background: #059669; }
+        .btn-block { width: 100%; justify-content: center; }
+        /* ── TEXT ── */
+        .client-name { font-weight: 700; color: var(--text); display: block; font-size: 14px; }
+        .client-date { font-size: 12px; color: var(--text-3); }
+        .client-course { color: #2563eb; font-weight: 600; font-size: 13px; }
+        .lead-msg-bubble { font-size: 12px; color: var(--text-2); margin-top: 6px; background: #f9fafb; border: 1px solid var(--border); border-radius: 7px; padding: 5px 9px; max-width: 280px; max-height: 60px; overflow-y: auto; word-break: break-word; line-height: 1.4; }
+        /* ── WA BUTTON ── */
+        .btn-wa-chat { background: #16a34a; color: #fff !important; padding: 7px 13px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s ease; white-space: nowrap; }
+        .btn-wa-chat:hover { background: #15803d; }
+        /* ── ANALYTICS ── */
+        .analytics-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap: 16px; margin-bottom: 24px; }
+        .metric-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow-sm); }
+        .metric-title { font-size: 12px; color: var(--text-2); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+        .metric-val { font-size: 26px; font-weight: 800; color: var(--text); }
+        .metric-sub { font-size: 12px; margin-top: 6px; color: var(--text-2); }
+        .val-green { color: #16a34a; }
+        .val-amber { color: #d97706; }
+        .val-red { color: #e11d48; }
+        .val-blue { color: #2563eb; }
+        .progress-bar-bg { background: #f3f4f6; height: 8px; border-radius: 8px; overflow: hidden; margin-top: 8px; }
+        .progress-bar-fill { height: 100%; border-radius: 8px; }
+        /* ── MESSAGES ── */
+        .dash-messages { margin-bottom: 20px; }
+        .dash-msg-ok { background: #f0fdf4; border: 1px solid #86efac; color: #166534; padding: 12px 16px; border-radius: 10px; display: flex; align-items: center; gap: 10px; font-size: 13.5px; font-weight: 600; margin-bottom: 8px; }
+        .dash-msg-err { background: #fff1f2; border: 1px solid #fca5a5; color: #9f1239; padding: 12px 16px; border-radius: 10px; display: flex; align-items: center; gap: 10px; font-size: 13.5px; font-weight: 600; margin-bottom: 8px; }
+        /* ── MAIN GRID ── */
+        .dash-main-grid { display: grid; grid-template-columns: minmax(0,1fr) 360px; gap: 24px; }
+        .dash-main-grid > div { min-width: 0; }
+        @media (max-width: 1100px) { .dash-main-grid { grid-template-columns: 1fr; } }
+
+    
+        /* ── TELEGRAM GRID & COMPACT CARDS ── */
+        .tg-grid {
+            display: grid;
+            grid-template-columns: minmax(340px, 460px) minmax(360px, 1fr);
+            gap: 20px;
+            margin-bottom: 24px;
+            align-items: start;
+        }
+        @media (max-width: 960px) {
+            .tg-grid { grid-template-columns: 1fr; }
+        }
+
+        .qr-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .qr-box-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 12px 0;
+            margin-bottom: 12px;
+        }
+        .qr-image {
+            max-width: 190px;
+            height: auto;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            padding: 8px;
+            background: #ffffff;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* ── COMPACT CONNECTED ADMIN BOX ── */
+        .connected-admin-box {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 12px;
+            padding: 10px 14px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .connected-admin-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .connected-admin-name {
+            font-size: 14.5px;
+            font-weight: 800;
+            color: #166534;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .connected-admin-sub {
+            font-size: 11.5px;
+            color: #475569;
+        }
+
+        /* ── COMPACT UNIFIED ACTION TOOLBAR ── */
+        .tg-actions-toolbar {
+            display: flex;
+            gap: 7px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+        .tg-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            height: 34px;
+            padding: 0 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            text-decoration: none !important;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+            user-select: none;
+            box-sizing: border-box;
+            border: 1px solid transparent;
+        }
+        .tg-btn-primary {
+            background: #0284c7;
+            color: #ffffff !important;
+            border-color: #0284c7;
+            box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);
+        }
+        .tg-btn-primary:hover {
+            background: #0369a1;
+            border-color: #0369a1;
+        }
+        .tg-btn-purple {
+            background: #f5f3ff;
+            color: #7c3aed;
+            border-color: #ddd6fe;
+        }
+        .tg-btn-purple:hover {
+            background: #ede9fe;
+            border-color: #c4b5fd;
+        }
+        .tg-btn-outline {
+            background: #ffffff;
+            color: var(--text);
+            border-color: var(--border);
+        }
+        .tg-btn-outline:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+        .tg-btn-green {
+            background: #f0fdf4;
+            color: #16a34a;
+            border-color: #bbf7d0;
+        }
+        .tg-btn-green:hover {
+            background: #dcfce7;
+            border-color: #86efac;
+        }
+        .tg-btn-amber {
+            background: #fffbeb;
+            color: #d97706;
+            border-color: #fde68a;
+        }
+        .tg-btn-amber:hover {
+            background: #fef3c7;
+            border-color: #fcd34d;
+        }
+        .tg-btn-danger-xs {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 7px;
+            font-size: 11.5px;
+            font-weight: 700;
+            background: #fff1f2;
+            color: #ef4444;
+            border: 1px solid #fecaca;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+        }
+        .tg-btn-danger-xs:hover {
+            background: #fee2e2;
+            border-color: #f87171;
+        }
+
+        /* ── STATUS PILLS ── */
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11.5px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .status-pill.connected {
+            background: #f0fdf4;
+            color: #16a34a;
+            border: 1px solid #bbf7d0;
+        }
+        .status-pill.waiting {
+            background: #fffbeb;
+            color: #d97706;
+            border: 1px solid #fde68a;
+        }
+
+        /* ── LIVE CHAT COMPACT STYLING ── */
+        .chat-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            background: var(--surface);
+            min-height: 460px;
+            box-shadow: var(--shadow-sm);
+        }
+        @media (max-width: 768px) {
+            .chat-layout { grid-template-columns: 1fr; }
+        }
+        .chat-sidebar {
+            background: #f8fafc;
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-main {
+            display: flex;
+            flex-direction: column;
+            background: #ffffff;
+            min-height: 420px;
+        }
+        .chat-header {
+            padding: 12px 18px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #ffffff;
+        }
+        .chat-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: #0284c7;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        .chat-messages-area {
+            flex: 1;
+            padding: 18px;
+            overflow-y: auto;
+            max-height: 380px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: #fdfdfd;
+        }
+        .chat-input-area {
+            padding: 10px 14px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 10px;
+            background: #ffffff;
+        }
+        .quick-chip {
+            padding: 4px 10px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            background: #ffffff;
+            font-size: 11.5px;
+            color: var(--text-2);
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.15s ease;
+        }
+        .quick-chip:hover {
+            background: #f1f5f9;
+            color: var(--text);
+            border-color: #cbd5e1;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Шапка -->
+        <header class="dash-header">
+        <div class="dash-header-inner">
+            <a href="{% url 'admin_dashboard' %}" class="dash-logo">
+                <div class="dash-logo-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                </div>
+                <div>
+                    <div class="dash-logo-text">Учебный Центр CRM</div>
+                    <div class="dash-logo-sub">Панель Управления</div>
+                </div>
+            </a>
+            <div class="dash-header-actions">
+                <a href="{% url 'home' %}" target="_blank" class="btn-hdr">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    Сайт
+                </a>
+                <a href="{% url 'admin_logout' %}" class="btn-hdr btn-hdr-danger">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    Выход
+                </a>
+            </div>
+        </div>
+    </header>
+
+
+    <div class="dash-container">
+
+        <!-- Навигация Таблари -->
+                <div class="dash-nav">
+            <div class="dash-nav-row">
+                <span class="dash-nav-label">CRM</span>
+                <div class="nav-divider"></div>
+                <a href="{% url 'admin_dashboard' %}?tab=leads" class="dash-tab">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="m9 12 2 2 4-4"/></svg>
+                    Заявки
+                </a>
+                <a href="{% url 'admin_dashboard' %}?tab=staff" class="dash-tab">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    Сотрудники
+                </a>
+                <a href="{% url 'admin_dashboard' %}?tab=rent" class="dash-tab">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    Аренда
+                </a>
+                <a href="{% url 'admin_dashboard' %}?tab=analytics" class="dash-tab">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                    Аналитика
+                </a>
+                <a href="{% url 'dashboard_kanban' %}" class="dash-tab">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    Kanban CRM
+                </a>
+            </div>
+            <div class="dash-nav-row">
+                <span class="dash-nav-label">Мессенджеры</span>
+                <div class="nav-divider"></div>
+                <a href="{% url 'admin_dashboard' %}?tab=leads" class="dash-tab" style="color:#16a34a;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.746.953 3.71 1.456 5.711 1.456h.005c6.554 0 11.89-5.336 11.893-11.893a11.821 11.821 0 00-3.48-8.414z"/></svg>
+                    WhatsApp
+                </a>
+                <a href="{% url 'dashboard_telegram' %}" class="dash-tab active-tg">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.75-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
+                    Telegram
+                </a>
+                <a href="{% url 'dashboard_instagram' %}" class="dash-tab" style="color:#c13584;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                    Instagram
+                </a>
+                <div class="nav-divider"></div>
+                <span class="dash-nav-label">Обучение</span>
+                <div class="nav-divider"></div>
+                <a href="{% url 'dashboard_schedule' %}" class="dash-tab">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    Расписание
+                </a>
+                <a href="{% url 'dashboard_teachers' %}" class="dash-tab">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                    Преподаватели
+                </a>
+                <a href="{% url 'dashboard_groups' %}" class="dash-tab">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    Группы
+                </a>
+                <a href="{% url 'dashboard_schedule_settings' %}" class="dash-tab">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    Настройки
+                </a>
+            </div>
+        </div>
+
+
+        <!-- Асосий Telegram Блок -->
+        <div class="tg-grid">
+
+            <!-- Чап шт.раф: QR-код орқали уланиш карточкаси -->
+            <div class="qr-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h2 style="font-size: 20px; font-weight: 800; margin: 0; display: flex; align-items: center; gap: 10px; color: #0f172a;">
+                        <i class="fa-brands fa-telegram" style="color: #38bdf8; font-size: 26px;"></i> Подключение Telegram по QR-коду
+                    </h2>
+                    <div id="tg-status-badge">
+                        {% if tg_settings.is_connected %}
+                            <span class="status-pill connected">
+                                <i class="fa-solid fa-circle-check"></i> Бот подключен
+                            </span>
+                        {% else %}
+                            <span class="status-pill waiting">
+                                <i class="fa-solid fa-spinner fa-spin"></i> Ожидание подключения
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if not tg_settings.bot_token %}
+                <!-- ⚠️ Токен бота не указан — созлаш йўриқномаси -->
+                <div style="background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.4); border-radius: 14px; padding: 16px; margin-bottom: 18px; text-align: left;">
+                    <div style="font-size: 14px; font-weight: 800; color: #fbbf24; margin-bottom: 10px;">
+                        ⚠️ Telegram-бот еще не настроен
+                    </div>
+                    <div style="font-size: 13px; color: #334155; line-height: 1.7;">
+                        Для генерации QR-кода создайте бота в Telegram:
+                        <ol style="margin: 8px 0 0 18px; padding: 0; color: #475569;">
+                            <li>Напишите в Telegram боту <b style="color: #0284c7;">@BotFather</b></li>
+                            <li>Отправьте команду <code>/newbot</code></li>
+                            <li>Укажите название и username бота (например: <code>MyCenterBot</code>)</li>
+                            <li>Скопируйте полученный <b>Token</b> и сохраните в форме справа</li>
+                            <li>После сохранения QR-код обновится автоматически ✅</li>
+                        </ol>
+                    </div>
+                </div>
+                {% else %}
+                <p style="color: #475569; font-size: 14px; margin: 0 0 16px 0; line-height: 1.5;">
+                    Отсканируйте QR-код через Telegram на телефоне → нажмите кнопку <b>Start</b> → аккаунт автоматически привяжется к CRM.
+                </p>
+                {% endif %}
+
+                <!-- QR-код расми -->
+                <div class="qr-box-wrapper" id="tg-qr-container">
+                    <img src="{{ qr_base64 }}" alt="Telegram QR Code" class="qr-image" id="tg-qr-img">
+                </div>
+
+                <!-- 30 сек.лик шт.ймер ва жонли сшт.тус -->
+                <div style="margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; color: #475569; margin-bottom: 6px;">
+                        <span><i class="fa-solid fa-clock"></i> Автопроверка: <b id="countdown-sec" style="color: #38bdf8;">30</b> сек.</span>
+                        <span id="tg-check-status" style="color: #34d399;">Связь с сервером активна (онлайн)</span>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.08); height: 6px; border-radius: 6px; overflow: hidden;">
+                        <div id="countdown-bar" style="background: #38bdf8; height: 100%; width: 100%; transition: width 1s linear;"></div>
+                    </div>
+                </div>
+
+                <!-- Уланган профиль маълумоти -->
+                <!-- Уланган профиль маълумоти (Компактный вид) -->
+                <div id="connected-info-box" class="connected-admin-box" style="{% if not tg_settings.is_connected %}display: none;{% endif %}">
+                    <div class="connected-admin-meta">
+                        <span class="connected-admin-name">
+                            <i class="fa-solid fa-circle-check"></i>
+                            <span id="admin-name-display">{{ tg_settings.admin_name|default:"@Admin" }}</span>
+                        </span>
+                        <span class="connected-admin-sub">
+                            Chat ID: <code style="color: #0284c7;" id="admin-chat-id-display">{{ tg_settings.admin_chat_id|default:"-" }}</code>
+                            {% if tg_settings.connected_at %}
+                            • Подключен: {{ tg_settings.connected_at|date:"d.m.Y, H:i" }}
+                            {% endif %}
+                        </span>
+                    </div>
+                    <button type="button" onclick="logoutTelegram()" class="tg-btn-danger-xs">
+                        <i class="fa-solid fa-link-slash"></i> Отключить
+                    </button>
+                </div>
+
+                <!-- Тугмалар панели (Компактный унифицированный ряд) -->
+                <div class="tg-actions-toolbar">
+                    <button type="button" onclick="handleOpenTelegram()" class="tg-btn tg-btn-primary" id="btn-open-tg">
+                        <i class="fa-brands fa-telegram"></i> Открыть в Telegram
+                    </button>
+                    <button type="button" onclick="openWebhookModal()" class="tg-btn tg-btn-purple" title="Настройки Telegram Webhook">
+                        <i class="fa-solid fa-network-wired"></i> Webhook: <span id="webhook-badge-text">{% if tg_settings.is_webhook_active %}Активен ✅{% else %}Polling 🔄{% endif %}</span>
+                    </button>
+                    <button type="button" onclick="checkTelegramStatusNow()" class="tg-btn tg-btn-outline">
+                        <i class="fa-solid fa-arrows-rotate"></i> Проверить
+                    </button>
+                    <button type="button" onclick="testSendTelegram()" class="tg-btn tg-btn-green">
+                        <i class="fa-solid fa-paper-plane"></i> Тест
+                    </button>
+                    <button type="button" onclick="openFastConnectModal()" class="tg-btn tg-btn-amber" title="Быстрое подключение / ручной ввод Chat ID">
+                        <i class="fa-solid fa-bolt"></i> Быстро
+                    </button>
+                </div>
+            </div>
+
+            <!-- Ўнг шт.раф: Бот созламалари ва автомат хабарномалар -->
+            <div class="panel-box">
+                <div class="panel-title">
+                    <span><i class="fa-solid fa-sliders" style="color: #38bdf8;"></i> Настройки Telegram Бота</span>
+                    <span style="font-size: 12px; background: rgba(56,189,248,0.15); color: #38bdf8; padding: 4px 10px; border-radius: 6px;">@BotFather</span>
+                </div>
+
+                <form id="tgSettingsForm" onsubmit="saveTelegramSettings(event)">
+                    {% csrf_token %}
+                    
+                    <div style="margin-bottom: 18px;">
+                        <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 8px;">
+                            Telegram Bot Token
+                        </label>
+                        <div style="position: relative;">
+                            <input type="password" name="bot_token" id="bot_token_input" class="form-input" value="{{ tg_settings.bot_token }}" placeholder="123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ...">
+                            <button type="button" onclick="toggleTokenVisibility()" style="position: absolute; right: 12px; top: 11px; background: none; border: none; color: #475569; cursor: pointer;">
+                                <i class="fa-solid fa-eye" id="token-eye-icon"></i>
+                            </button>
+                        </div>
+                        <small style="color: #475569; font-size: 11px; display: block; margin-top: 4px;">
+                            Создайте бота в Telegram через <b>@BotFather</b> с помощью команды <code>/newbot</code>.
+                        </small>
+                    </div>
+
+                    <div style="margin-bottom: 18px;">
+                        <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 8px;">
+                            Юзернейм бота (@username)
+                        </label>
+                        <div style="display: flex; align-items: center; background: #f8fafc; border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 0 12px;">
+                            <span style="color: #38bdf8; font-weight: 700;">@</span>
+                            <input type="text" name="bot_username" id="bot_username_input" class="form-input" value="{{ tg_settings.bot_username|default:'EduCenterKzBot' }}" style="border: none; background: transparent; padding-left: 6px;" placeholder="EduCenterKzBot">
+                        </div>
+                        <small style="color: #475569; font-size: 11px; display: block; margin-top: 4px;">
+                            QR-код автоматически ведет на этого бота.
+                        </small>
+                    </div>
+
+                    <div style="margin-bottom: 22px; background: rgba(255,255,255,0.03); padding: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06);">
+                        <label style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+                            <input type="checkbox" name="notify_on_new_lead" id="notify_on_new_lead" {% if tg_settings.notify_on_new_lead %}checked{% endif %} style="width: 18px; height: 18px; accent-color: #0284c7;">
+                            <div>
+                                <strong style="font-size: 14px; color: #0f172a;">Уведомления при новых заявках</strong>
+                                <p style="font-size: 12px; color: #475569; margin: 2px 0 0 0;">При поступлении заявки на сайт администратор моментально получит сообщение в Telegram (имя, номер +7, курс).</p>
+                            </div>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="tg-btn tg-btn-primary" style="width: 100%; height: 38px; font-size: 13px; font-weight: 700;">
+                        <i class="fa-solid fa-floppy-disk"></i> Сохранить настройки
+                    </button>
+                </form>
+
+                <div id="save-alert" style="display: none; margin-top: 14px; padding: 12px; border-radius: 10px; font-size: 13px; text-align: center;"></div>
+
+                <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 24px 0 20px 0;">
+
+                <div class="panel-title" style="margin-bottom: 12px;">
+                    <span style="font-size: 15px;"><i class="fa-solid fa-network-wired" style="color: #38bdf8;"></i> Telegram Webhook & Режим</span>
+                    <span id="webhook-badge-text" style="font-size: 12px; padding: 4px 10px; border-radius: 6px; font-weight: 700; background: {% if tg_settings.is_webhook_active %}rgba(16,185,129,0.15); color: #34d399;{% else %}rgba(56,189,248,0.15); color: #38bdf8;{% endif %}">
+                        {% if tg_settings.is_webhook_active %}Активен ✅{% else %}Polling (каждые 4с) 🔄{% endif %}
+                    </span>
+                </div>
+
+                <p style="font-size: 12px; color: #475569; margin-bottom: 12px; line-height: 1.5;">
+                    Прием сообщений от клиентов в Telegram:
+                    <br>• <b>Polling (fallback)</b> — для локальной работы (опрос каждые 4–5 сек.).
+                    <br>• <b>Webhook (HTTPS)</b> — для работы на сервере или через ngrok (мгновенный прием 200 мс).
+                </p>
+
+                <div style="margin-bottom: 12px;">
+                    <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;">
+                        HTTPS Webhook URL (ngrok или сервер):
+                    </label>
+                    <input type="url" id="webhook_url_input" class="form-input" value="{{ tg_settings.webhook_url|default:'' }}" placeholder="https://xxxx.ngrok-free.app/api/telegram/webhook/">
+                </div>
+
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button type="button" onclick="manageWebhook('set')" class="tg-btn tg-btn-primary" style="flex: 1; min-width: 140px;">
+                        <i class="fa-solid fa-link"></i> Установить Webhook
+                    </button>
+                    <button type="button" onclick="manageWebhook('info')" class="tg-btn tg-btn-outline">
+                        <i class="fa-solid fa-circle-info"></i> Проверить
+                    </button>
+                    <button type="button" onclick="manageWebhook('delete')" class="tg-btn-danger-xs" style="padding: 0 12px; height: 34px;">
+                        <i class="fa-solid fa-trash-can"></i> Удалить Webhook
+                    </button>
+                </div>
+                <div id="webhook-alert" style="display: none; margin-top: 12px; padding: 10px 14px; border-radius: 8px; font-size: 12px; line-height: 1.4;"></div>
+            </div>
+
+        </div>
+
+        <!-- ======================================================== -->
+        <!-- ЖОНЛИ TELEGRAM ХАБАРЛАР & ЧАТ (MESSAGES & LIVE CHAT)     -->
+        <!-- ======================================================== -->
+        <div class="panel-box" style="margin-bottom: 28px;">
+            <div class="panel-title">
+                <span style="display: flex; align-items: center; gap: 10px;">
+                    <i class="fa-solid fa-comments" style="color: #38bdf8; font-size: 20px;"></i>
+                    Сообщения Telegram и Онлайн-чат
+                    <span id="unread-chats-badge" style="display: none; background: #ef4444; color: #0f172a; font-size: 11px; padding: 2px 8px; border-radius: 12px; font-weight: 800;">0 новых</span>
+                </span>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 12px; color: #475569; display: inline-flex; align-items: center; gap: 6px;">
+                        <span style="width: 8px; height: 8px; border-radius: 50%; background: #34d399; display: inline-block;"></span>
+                        Автообновление каждые 4 сек.
+                    </span>
+                    <button type="button" onclick="loadTelegramChats(true)" class="btn" style="background: rgba(255,255,255,0.08); color: #0f172a; border: 1px solid rgba(255,255,255,0.12); padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer;">
+                        <i class="fa-solid fa-rotate"></i> Обновить
+                    </button>
+                </div>
+            </div>
+
+            <div class="chat-layout">
+                <!-- Чаты рўйхати (Чап томон) -->
+                <div class="chat-sidebar">
+                    <div style="padding: 12px 14px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+                        <input type="text" id="chatSearchInput" oninput="filterChats()" placeholder="Поиск диалога..." class="form-input" style="font-size: 13px; padding: 8px 12px;">
+                    </div>
+                    <div id="tg-chat-list" class="chat-list-container">
+                        <div style="text-align: center; padding: 50px 14px; color: #475569; font-size: 13px;">
+                            <i class="fa-solid fa-spinner fa-spin" style="font-size: 22px; color: #38bdf8; margin-bottom: 10px; display: block;"></i>
+                            Загрузка сообщений...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Суҳбат ойнаси (Ўнг томон) -->
+                <div class="chat-main" id="tg-chat-main">
+                    <!-- Чат шт.нланмаган ҳолат -->
+                    <div id="no-chat-selected" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 440px; color: #475569; text-align: center; padding: 20px;">
+                        <div style="width: 68px; height: 68px; border-radius: 50%; background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.25); display: flex; align-items: center; justify-content: center; margin-bottom: 14px; color: #38bdf8; font-size: 30px;">
+                            <i class="fa-brands fa-telegram"></i>
+                        </div>
+                        <h4 style="color: #0f172a; margin: 0 0 6px 0; font-size: 17px; font-weight: 700;">Выберите диалог</h4>
+                        <p style="font-size: 13px; max-width: 360px; margin: 0; line-height: 1.6; color: #475569;">
+                            Выберите клиента из списка слева, чтобы просмотреть переписку и ответить ему прямо из панели.
+                        </p>
+                    </div>
+
+                    <!-- Фаол чат контейнери -->
+                    <div id="active-chat-container" style="display: none; height: 100%; flex-direction: column;">
+                        <!-- Чат сарлавҳаси -->
+                        <div class="chat-header">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div class="chat-avatar" id="active-chat-avatar">U</div>
+                                <div>
+                                    <div style="font-size: 15px; font-weight: 700; color: #0f172a;" id="active-chat-name">Клиент</div>
+                                    <div style="font-size: 12px; color: #475569; display: flex; align-items: center; gap: 8px; margin-top: 2px;">
+                                        <span id="active-chat-role" style="background: rgba(56,189,248,0.15); color: #38bdf8; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;">Клиент</span>
+                                        <span id="active-chat-user-id" style="font-family: monospace;">Chat ID: -</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <button type="button" onclick="loadChatMessages(currentActiveChatId)" class="btn" style="background: rgba(255,255,255,0.06); color: #475569; border: 1px solid rgba(255,255,255,0.1); padding: 7px 12px; border-radius: 8px; font-size: 12px; cursor: pointer;" title="Обновить">
+                                    <i class="fa-solid fa-arrows-rotate"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Сообщения шт.рихи леншт.си -->
+                        <div class="chat-messages-area" id="tg-messages-thread">
+                            <!-- Динамик қўшилади -->
+                        </div>
+
+                        <!-- Быстро жавоб шаблонлари -->
+                        <div style="padding: 7px 14px; background: #f8fafc; border-top: 1px solid #e2e8f0; border-top: 1px solid #e2e8f0; display: flex; gap: 8px; overflow-x: auto;">
+                            <button type="button" onclick="insertQuickReply('Здравствуйте! Чем мы можем вам помочь?')" class="quick-chip">👋 Приветствие</button>
+                            <button type="button" onclick="insertQuickReply('Ваш пробный урок согласован. Будем рады видеть вас!')" class="quick-chip">📅 Урок подтвержден</button>
+                            <button type="button" onclick="insertQuickReply('Стоимость обучения от 35 000 ₸ в месяц. Занятия 3 раза в неделю.')" class="quick-chip">💰 О ценах и курсе</button>
+                            <button type="button" onclick="insertQuickReply('Пожалуйста, укажите ваше имя и контактный номер телефона.')" class="quick-chip">📝 Запросить контакты</button>
+                        </div>
+
+                        <!-- Хабар ёзиш формаси -->
+                        <form class="chat-input-area" onsubmit="handleSendReply(event)">
+                            <input type="text" id="tg-reply-text" placeholder="Напишите ответ клиенту в Telegram..." class="form-input" style="flex: 1;" autocomplete="off">
+                            <button type="submit" class="btn-tg" style="color: #fff !important; padding: 10px 20px;" id="btn-send-reply">
+                                <i class="fa-solid fa-paper-plane"></i> Отправить
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Қуйи блок: Клиентлар (Лидлар) билан Telegram орқали тўғридан-тўғри алоқа -->
+        <div class="panel-box">
+            <div class="panel-title">
+                <span style="display: flex; align-items: center; gap: 10px;">
+                    <i class="fa-solid fa-users" style="color: #38bdf8;"></i> Клиенты и прямая связь в Telegram
+                </span>
+                <span style="font-size: 13px; color: #475569;">Контакты клиентов (+7)</span>
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table class="leads-table">
+                    <thead>
+                        <tr>
+                            <th>ИМЯ КЛИЕНТА И ДАТА</th>
+                            <th>НОМЕР ТЕЛЕФОНА (+7)</th>
+                            <th>КУРС И СТОИМОСТЬ (₸)</th>
+                            <th>СТАТУС</th>
+                            <th>СВЯЗЬ В МЕССЕНДЖЕРАХ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for lead in leads %}
+                        <tr>
+                            <td>
+                                {% if lead.name and lead.name != lead.phone and not '@' in lead.name and not '+' in lead.name %}
+                                    <strong style="color: #0f172a; font-size: 15px;">{{ lead.name }}</strong>
+                                {% else %}
+                                    <strong style="color: #38bdf8; font-size: 14px;"><i class="fa-solid fa-user"></i> Клиент (Онлайн)</strong>
+                                {% endif %}
+                                <div style="font-size: 11px; color: #475569;">{{ lead.created_at|date:"d.m.Y, H:i" }}</div>
+                            </td>
+                            <td>
+                                <strong style="color: #38bdf8; font-size: 14px;">{{ lead.phone }}</strong>
+                            </td>
+                            <td>
+                                <span style="color: #60a5fa; font-weight: 600;">{{ lead.course.title|default:lead.course_name_custom|default:"Общий курс" }}</span>
+                                <div style="font-size: 11px; color: #475569;">{{ lead.course.price_kzt|default:35000 }} ₸</div>
+                            </td>
+                            <td>
+                                {% if lead.status == 'new' %}
+                                    <span style="background: rgba(59,130,246,0.15); color: #60a5fa; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700;">Новый 🆕</span>
+                                {% elif lead.status == 'in_progress' %}
+                                    <span style="background: rgba(245,158,11,0.15); color: #fbbf24; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700;">В диалоге 💬</span>
+                                {% elif lead.status == 'paid' %}
+                                    <span style="background: rgba(16,185,129,0.15); color: #34d399; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700;">Обучается ✅</span>
+                                {% else %}
+                                    <span style="background: rgba(239,68,68,0.15); color: #f87171; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700;">Отказ ❌</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <!-- Telegram очиш тугмаси -->
+                                    <a href="https://t.me/{{ lead.phone|slugify }}" target="_blank" class="btn" style="background: linear-gradient(135deg, #0088cc, #0284c7); color: #0f172a; padding: 7px 12px; font-size: 12px; font-weight: 700; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                                        <i class="fa-brands fa-telegram"></i> Написать в Telegram
+                                    </a>
+                                    <!-- WhatsApp очиш тугмаси -->
+                                    <a href="https://wa.me/{{ lead.phone|slugify }}" target="_blank" class="btn" style="background: #25D366; color: #0f172a; padding: 7px 10px; font-size: 12px; font-weight: 700; border-radius: 8px; text-decoration: none;" title="Открыть в WhatsApp">
+                                        <i class="fa-brands fa-whatsapp"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 30px; color: #475569;">Пока нет поступивших заявок.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Быстро тест уланиш Модали -->
+    <div class="custom-modal" id="fastConnectModal">
+        <div class="modal-body">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="margin: 0; font-size: 18px; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-bolt" style="color: #fbbf24;"></i> Быстрое подключение (Тест / Вручную)
+                </h3>
+                <button type="button" onclick="closeFastConnectModal()" style="background: none; border: none; color: #475569; font-size: 18px; cursor: pointer;">&times;</button>
+            </div>
+            <p style="font-size: 13px; color: #475569; margin-bottom: 16px;">
+                Если у вас еще нет токена бота или вы хотите сразу протестировать систему, укажите Chat ID администратора:
+            </p>
+            <div style="margin-bottom: 14px;">
+                <label style="font-size: 12px; color: #475569; display: block; margin-bottom: 6px;">Имя администратора или @username</label>
+                <input type="text" id="fast_admin_name" class="form-input" value="@EduCenterAdmin" placeholder="@username">
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label style="font-size: 12px; color: #475569; display: block; margin-bottom: 6px;">Telegram Chat ID или номер</label>
+                <input type="text" id="fast_chat_id" class="form-input" value="77081160265" placeholder="77081160265">
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button type="button" onclick="closeFastConnectModal()" class="btn" style="background: rgba(255,255,255,0.08); color: #0f172a; border: none; padding: 9px 16px; border-radius: 8px; cursor: pointer;">Отмена</button>
+                <button type="button" onclick="submitFastConnect()" class="btn-tg" style="color: #fff !important; padding: 9px 18px;">
+                    <i class="fa-solid fa-check"></i> Подтвердить подключение
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Webhook созлаш модали -->
+    <div class="custom-modal" id="webhookModal">
+        <div class="modal-body">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="margin: 0; font-size: 18px; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-network-wired" style="color: #c084fc;"></i> Настройки Telegram Webhook
+                </h3>
+                <button type="button" onclick="closeWebhookModal()" style="background: none; border: none; color: #475569; font-size: 18px; cursor: pointer;">&times;</button>
+            </div>
+            <p style="font-size: 13px; color: #475569; margin-bottom: 14px; line-height: 1.5;">
+                Настройте HTTPS Webhook URL для мгновенной доставки сообщений из Telegram в CRM.
+            </p>
+            <div style="margin-bottom: 14px;">
+                <label style="font-size: 12px; color: #475569; display: block; margin-bottom: 6px;">HTTPS Webhook URL</label>
+                <input type="url" id="webhook_url_input" class="form-input" value="{{ tg_settings.webhook_url|default:'' }}" placeholder="https://domain.kz/api/telegram/webhook/">
+                <small style="color: #475569; font-size: 11px; display: block; margin-top: 4px;">Адрес эндпоинта: <code>/api/telegram/webhook/</code></small>
+            </div>
+            <div id="webhook-alert" style="display: none; margin-bottom: 14px; padding: 10px; border-radius: 8px; font-size: 12px;"></div>
+            <div style="display: flex; gap: 10px; justify-content: space-between;">
+                <button type="button" onclick="deleteWebhookAction()" class="btn-danger-outline">
+                    <i class="fa-solid fa-trash"></i> Удалить Webhook (Polling)
+                </button>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" onclick="closeWebhookModal()" class="btn" style="background: rgba(255,255,255,0.08); color: #0f172a; border: none; padding: 9px 14px; border-radius: 8px; cursor: pointer;">Закрыть</button>
+                    <button type="button" onclick="saveWebhookAction()" class="btn-tg" style="color: #fff !important; padding: 9px 18px;">
+                        <i class="fa-solid fa-check"></i> Установить
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript логикаси -->
+    <script>
+        let countdown = 30;
+        let isConnected = {% if tg_settings.is_connected %}true{% else %}false{% endif %};
+        const csrfToken = '{{ csrf_token }}';
+
+        let currentConnectUrl = "{{ connect_url|escapejs }}";
+        let currentAppUrl = "{{ app_url|escapejs }}";
+        let currentBotUsername = "{{ bot_username|escapejs }}";
+        let hasBotUsername = {% if has_username %}true{% else %}false{% endif %};
+
+        let currentActiveChatId = null;
+        let allChats = [];
+
+        // 1. "Open in Telegram" тугмаси логикаси
+        function handleOpenTelegram() {
+            const inputEl = document.getElementById('bot_username_input');
+            const enteredUser = (inputEl ? inputEl.value : '').trim().replace(/^@/, '');
+            const activeUsername = enteredUser || currentBotUsername;
+
+            if (!activeUsername) {
+                alert("Please enter the bot username first");
+                if (inputEl) inputEl.focus();
+                return;
+            }
+
+            const authSecret = "{{ tg_settings.auth_secret }}";
+            const deepLink = currentConnectUrl || `https://t.me/${activeUsername}?start=crm_${authSecret}`;
+            const appLink = currentAppUrl || `tg://resolve?domain=${activeUsername}&start=crm_${authSecret}`;
+
+            const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+            if (isMobile) {
+                const start = Date.now();
+                window.location.href = appLink;
+                setTimeout(() => {
+                    if (Date.now() - start < 2000) {
+                        window.location.href = deepLink;
+                    }
+                }, 1200);
+            } else {
+                window.open(deepLink, '_blank');
+            }
+        }
+
+        // 2. Сшт.тус ва шт.ймер
+        setInterval(() => {
+            if (!isConnected) {
+                countdown--;
+                if (countdown <= 0) {
+                    countdown = 30;
+                    checkTelegramStatusNow();
+                }
+                const secEl = document.getElementById('countdown-sec');
+                const barEl = document.getElementById('countdown-bar');
+                if (secEl) secEl.innerText = countdown;
+                if (barEl) barEl.style.width = (countdown / 30 * 100) + '%';
+            }
+        }, 1000);
+
+        async function checkTelegramStatusNow() {
+            try {
+                const res = await fetch("{% url 'api_telegram_status' %}");
+                const data = await res.json();
+                if (data.ok) {
+                    if (data.qr_base64) {
+                        const qrImg = document.getElementById('tg-qr-img');
+                        if (qrImg) qrImg.src = data.qr_base64;
+                    }
+                    if (data.connect_url) currentConnectUrl = data.connect_url;
+                    if (data.app_url) currentAppUrl = data.app_url;
+                    if (data.bot_username) {
+                        currentBotUsername = data.bot_username;
+                        const userInp = document.getElementById('bot_username_input');
+                        if (userInp && !userInp.value) userInp.value = data.bot_username;
+                    }
+                    hasBotUsername = data.has_username;
+                    if (data.is_connected) {
+                        setConnectedState(data.admin_name, data.admin_chat_id);
+                    }
+                    const whBadge = document.getElementById('webhook-badge-text');
+                    if (whBadge) {
+                        whBadge.innerText = data.is_webhook_active ? 'Активен ✅' : 'Polling 🔄';
+                    }
+                }
+            } catch (err) {
+                console.error("Сшт.тус текширишда хато:", err);
+            }
+        }
+
+        function setConnectedState(name, chatId) {
+            isConnected = true;
+            const badge = document.getElementById('tg-status-badge');
+            if (badge) {
+                badge.innerHTML = '<span class="status-pill connected"><i class="fa-solid fa-circle-check"></i> Бот подключен</span>';
+            }
+            const infoBox = document.getElementById('connected-info-box');
+            if (infoBox) {
+                infoBox.style.display = 'block';
+                document.getElementById('admin-name-display').innerText = name || '@Admin';
+                document.getElementById('admin-chat-id-display').innerText = chatId || '-';
+            }
+            const checkStatus = document.getElementById('tg-check-status');
+            if (checkStatus) {
+                checkStatus.innerText = '✅ Уланган (Хабарномалар фаол)';
+                checkStatus.style.color = '#34d399';
+            }
+        }
+
+        // 3. Сохранить настройки (ва бот юзернеймини автомат аниқлаш)
+        async function saveTelegramSettings(e) {
+            e.preventDefault();
+            const form = document.getElementById('tgSettingsForm');
+            const formData = new FormData(form);
+
+            const alertBox = document.getElementById('save-alert');
+            alertBox.style.display = 'block';
+            alertBox.style.background = 'rgba(56,189,248,0.15)';
+            alertBox.style.color = '#38bdf8';
+            alertBox.innerText = 'Сақланмоқда ва бот аниқланмоқда...';
+
+            try {
+                const res = await fetch("{% url 'api_telegram_save' %}", {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrfToken },
+                    body: formData
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    alertBox.style.background = 'rgba(16,185,129,0.15)';
+                    alertBox.style.color = '#34d399';
+                    alertBox.innerText = '✅ ' + data.message;
+
+                    if (data.bot_username) {
+                        currentBotUsername = data.bot_username;
+                        const uInput = document.getElementById('bot_username_input');
+                        if (uInput) uInput.value = data.bot_username;
+                    }
+                    if (data.connect_url) currentConnectUrl = data.connect_url;
+                    if (data.app_url) currentAppUrl = data.app_url;
+                    if (data.qr_base64) {
+                        const qrImg = document.getElementById('tg-qr-img');
+                        if (qrImg) qrImg.src = data.qr_base64;
+                    }
+                    hasBotUsername = data.has_username;
+                    setTimeout(() => { checkTelegramStatusNow(); }, 1200);
+                } else {
+                    alertBox.style.background = 'rgba(239,68,68,0.15)';
+                    alertBox.style.color = '#f87171';
+                    alertBox.innerText = '❌ Хато: ' + (data.error || 'Сақлаб бўлмади');
+                }
+            } catch (err) {
+                alertBox.style.background = 'rgba(239,68,68,0.15)';
+                alertBox.style.color = '#f87171';
+                alertBox.innerText = '❌ Серверга уланишда хато: ' + err.message;
+            }
+        }
+
+        // 4. ЖОНЛИ ЧАТ ВА ХАБАРЛАРНИ ЮКЛАШ (LIVE CHAT ENGINE)
+        async function loadTelegramChats(manual = false) {
+            try {
+                const res = await fetch("{% url 'api_telegram_messages_list' %}");
+                const data = await res.json();
+                if (data.ok) {
+                    allChats = data.chats || [];
+                    renderChatList(allChats);
+
+                    // Новый хабарлар бейджи
+                    const unreadTotal = data.unread_total || 0;
+                    const badgeEl = document.getElementById('unread-chats-badge');
+                    if (badgeEl) {
+                        if (unreadTotal > 0) {
+                            badgeEl.style.display = 'inline-block';
+                            badgeEl.innerText = unreadTotal + ' новых';
+                        } else {
+                            badgeEl.style.display = 'none';
+                        }
+                    }
+
+                    // Агар фаол чат шт.нланган бўлса — унинг хабарларини ҳам автомат новыхлаш
+                    if (currentActiveChatId) {
+                        loadChatMessages(currentActiveChatId, false);
+                    }
+                }
+            } catch (err) {
+                console.error("Чатыни юклашда хато:", err);
+            }
+        }
+
+        function renderChatList(chats) {
+            const listEl = document.getElementById('tg-chat-list');
+            if (!listEl) return;
+
+            if (!chats || chats.length === 0) {
+                listEl.innerHTML = `
+                    <div style="text-align: center; padding: 45px 14px; color: #475569; font-size: 13px;">
+                        Ҳозирча хабарлар мавжуд эмас.<br>
+                        <span style="font-size: 11px; color: #475569;">Ботга хабар ёзилганда шу ерда пайдо бўлади.</span>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            chats.forEach(c => {
+                const initial = (c.name || 'U').charAt(0).toUpperCase();
+                const isActive = (c.chat_id === currentActiveChatId) ? 'active' : '';
+                const unreadBadge = (c.unread_count > 0) ? `<span style="background: #ef4444; color: #0f172a; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 10px;">${c.unread_count}</span>` : '';
+                const lastSnippet = c.last_message ? (c.last_message.length > 28 ? c.last_message.substring(0, 28) + '...' : c.last_message) : 'Хабар йўқ';
+
+                html += `
+                    <div class="chat-item ${isActive}" onclick="openChat('${c.chat_id}', '${escapeHtml(c.name)}', '${escapeHtml(c.role)}', '${escapeHtml(c.username)}')">
+                        <div class="chat-avatar">${initial}</div>
+                        <div style="flex: 1; min-width: 0;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+                                <strong style="color: #0f172a; font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(c.name)}</strong>
+                                <span style="font-size: 10px; color: #475569;">${c.last_time || ''}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: 12px; color: #475569; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 170px;">
+                                    ${c.direction === 'out' ? '<i class="fa-solid fa-check-double" style="color: #38bdf8; font-size: 10px;"></i> ' : ''}${escapeHtml(lastSnippet)}
+                                </span>
+                                ${unreadBadge}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            listEl.innerHTML = html;
+        }
+
+        function filterChats() {
+            const query = (document.getElementById('chatSearchInput').value || '').toLowerCase();
+            const filtered = allChats.filter(c => 
+                (c.name || '').toLowerCase().includes(query) ||
+                (c.username || '').toLowerCase().includes(query) ||
+                (c.chat_id || '').toLowerCase().includes(query) ||
+                (c.last_message || '').toLowerCase().includes(query)
+            );
+            renderChatList(filtered);
+        }
+
+        function openChat(chatId, name, role, username) {
+            currentActiveChatId = chatId;
+            document.getElementById('no-chat-selected').style.display = 'none';
+            const activeCont = document.getElementById('active-chat-container');
+            activeCont.style.display = 'flex';
+
+            document.getElementById('active-chat-avatar').innerText = (name || 'U').charAt(0).toUpperCase();
+            document.getElementById('active-chat-name').innerText = name || 'Суҳбатдош';
+            document.getElementById('active-chat-role').innerText = role || 'Клиент';
+            document.getElementById('active-chat-user-id').innerText = username ? `@${username} (ID: ${chatId})` : `Chat ID: ${chatId}`;
+
+            renderChatList(allChats);
+            loadChatMessages(chatId, true);
+        }
+
+        async function loadChatMessages(chatId, scrollToBottom = true) {
+            if (!chatId) return;
+            try {
+                const res = await fetch(`/api/telegram/chat/${chatId}/`);
+                const data = await res.json();
+                if (data.ok) {
+                    const threadEl = document.getElementById('tg-messages-thread');
+                    if (!threadEl) return;
+
+                    if (!data.messages || data.messages.length === 0) {
+                        threadEl.innerHTML = '<div style="text-align: center; color: #475569; font-size: 13px; margin: auto;">Ҳозирча хабарлар йўқ. Биринчи хабарни ёзинг!</div>';
+                        return;
+                    }
+
+                    let html = '';
+                    data.messages.forEach(m => {
+                        const isOut = (m.direction === 'out');
+                        const bubbleClass = isOut ? 'out' : 'in';
+                        const checkIcon = isOut ? ' <i class="fa-solid fa-check-double" style="font-size: 9px;"></i>' : '';
+                        html += `
+                            <div class="chat-bubble ${bubbleClass}">
+                                <div>${escapeHtml(m.text)}</div>
+                                <span class="chat-time">${m.time}${checkIcon}</span>
+                            </div>
+                        `;
+                    });
+                    threadEl.innerHTML = html;
+
+                    if (scrollToBottom) {
+                        threadEl.scrollTop = threadEl.scrollHeight;
+                    }
+                }
+            } catch (err) {
+                console.error("Сообщенияни олишда хато:", err);
+            }
+        }
+
+        async function handleSendReply(e) {
+            e.preventDefault();
+            const textInp = document.getElementById('tg-reply-text');
+            const text = (textInp.value || '').trim();
+            if (!text || !currentActiveChatId) return;
+
+            const sendBtn = document.getElementById('btn-send-reply');
+            sendBtn.disabled = true;
+
+            // Оптимистик интерфейс
+            const threadEl = document.getElementById('tg-messages-thread');
+            const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const tempBubble = document.createElement('div');
+            tempBubble.className = 'chat-bubble out';
+            tempBubble.innerHTML = `<div>${escapeHtml(text)}</div><span class="chat-time">${nowTime} <i class="fa-solid fa-check" style="font-size: 9px;"></i></span>`;
+            threadEl.appendChild(tempBubble);
+            threadEl.scrollTop = threadEl.scrollHeight;
+            textInp.value = '';
+
+            try {
+                const formData = new FormData();
+                formData.append('chat_id', currentActiveChatId);
+                formData.append('text', text);
+
+                const res = await fetch("{% url 'api_telegram_reply' %}", {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrfToken },
+                    body: formData
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    loadChatMessages(currentActiveChatId, false);
+                    loadTelegramChats(false);
+                } else {
+                    alert("Хабар юборилмади: " + (data.error || 'Хатолик'));
+                }
+            } catch (err) {
+                alert("Отправитьда хато: " + err.message);
+            } finally {
+                sendBtn.disabled = false;
+                textInp.focus();
+            }
+        }
+
+        function insertQuickReply(text) {
+            const input = document.getElementById('tg-reply-text');
+            if (input) {
+                input.value = text;
+                input.focus();
+            }
+        }
+
+        // 5. Webhook бошқаруви
+        function openWebhookModal() {
+            document.getElementById('webhookModal').classList.add('active');
+        }
+        function closeWebhookModal() {
+            document.getElementById('webhookModal').classList.remove('active');
+        }
+        async function saveWebhookAction() {
+            const url = document.getElementById('webhook_url_input').value.trim();
+            const alertBox = document.getElementById('webhook-alert');
+            alertBox.style.display = 'block';
+            alertBox.style.background = 'rgba(56,189,248,0.15)';
+            alertBox.style.color = '#38bdf8';
+            alertBox.innerText = 'Webhook ўрнатилмоқда...';
+
+            const formData = new FormData();
+            formData.append('action', 'set');
+            formData.append('webhook_url', url);
+
+            try {
+                const res = await fetch("{% url 'api_telegram_set_webhook' %}", {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrfToken },
+                    body: formData
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    alertBox.style.background = 'rgba(16,185,129,0.15)';
+                    alertBox.style.color = '#34d399';
+                    alertBox.innerText = '✅ ' + (data.result ? data.result.description : 'Webhook ўрнатилди!');
+                    setTimeout(() => { closeWebhookModal(); checkTelegramStatusNow(); }, 1200);
+                } else {
+                    alertBox.style.background = 'rgba(239,68,68,0.15)';
+                    alertBox.style.color = '#f87171';
+                    alertBox.innerText = '❌ Хато: ' + (data.error || 'Webhook ўрнатиб бўлмади');
+                }
+            } catch (err) {
+                alertBox.style.background = 'rgba(239,68,68,0.15)';
+                alertBox.style.color = '#f87171';
+                alertBox.innerText = 'Хатолик: ' + err.message;
+            }
+        }
+
+        async function deleteWebhookAction() {
+            if (!confirm("Webhookни ўчириб, polling режимига қайтмоқчимисиз?")) return;
+            const formData = new FormData();
+            formData.append('action', 'delete');
+
+            try {
+                const res = await fetch("{% url 'api_telegram_set_webhook' %}", {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrfToken },
+                    body: formData
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    alert("✅ Webhook ўчирилди. Тизим polling режимига ўтди.");
+                    closeWebhookModal();
+                    checkTelegramStatusNow();
+                } else {
+                    alert("Хато: " + (data.error || 'Ўчириб бўлмади'));
+                }
+            } catch (err) {
+                alert("Хатолик: " + err.message);
+            }
+        }
+
+        // 6. Ёрдамчи функциялар
+        function escapeHtml(text) {
+            if (!text) return '';
+            return String(text)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // Бошланғич юкланиш ва 4 сек.лик live-polling
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTelegramChats();
+            setInterval(() => {
+                loadTelegramChats(false);
+            }, 4000);
+        });
+
+        // Отключить
+        async function logoutTelegram() {
+            if (!confirm("Ҳақиқашт.н ҳам Telegram алоқасини узмоқчимисиз?")) return;
+            try {
+                const res = await fetch("{% url 'api_telegram_logout' %}", {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrfToken }
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    location.reload();
+                } else {
+                    alert("Хато: " + data.error);
+                }
+            } catch (e) {
+                alert("Хатолик: " + e.message);
+            }
+        }
+
+        // Тест хабари юбориш
+        async function testSendTelegram() {
+            try {
+                const res = await fetch("{% url 'api_telegram_test_send' %}", {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrfToken }
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    alert("✅ " + data.message);
+                } else {
+                    alert("❌ Хатолик: " + data.error);
+                }
+            } catch (e) {
+                alert("Хатолик: " + e.message);
+            }
+        }
+
+        // Быстро уланиш модали
+        function openFastConnectModal() {
+            document.getElementById('fastConnectModal').classList.add('active');
+        }
+        function closeFastConnectModal() {
+            document.getElementById('fastConnectModal').classList.remove('active');
+        }
+        async function submitFastConnect() {
+            const name = document.getElementById('fast_admin_name').value;
+            const chatId = document.getElementById('fast_chat_id').value;
+            const formData = new FormData();
+            formData.append('admin_name', name);
+            formData.append('chat_id', chatId);
+
+            try {
+                const res = await fetch("{% url 'api_telegram_fast_connect' %}", {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrfToken },
+                    body: formData
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    closeFastConnectModal();
+                    setConnectedState(data.admin_name, data.admin_chat_id);
+                    alert("✅ " + data.message);
+                } else {
+                    alert("Хато: " + data.error);
+                }
+            } catch (e) {
+                alert("Хатолик: " + e.message);
+            }
+        }
+
+        function toggleTokenVisibility() {
+            const input = document.getElementById('bot_token_input');
+            const icon = document.getElementById('token-eye-icon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        async function manageWebhook(action) {
+            const whInput = document.getElementById('webhook_url_input');
+            const alertBox = document.getElementById('webhook-alert');
+            alertBox.style.display = 'block';
+            alertBox.style.background = 'rgba(56,189,248,0.15)';
+            alertBox.style.color = '#38bdf8';
+            alertBox.innerText = 'Сўров юборилмоқда...';
+
+            const formData = new FormData();
+            formData.append('action', action);
+            if (action === 'set') {
+                const val = (whInput ? whInput.value : '').trim();
+                if (!val) {
+                    alertBox.style.background = 'rgba(239,68,68,0.15)';
+                    alertBox.style.color = '#f87171';
+                    alertBox.innerText = '❌ Илтимос, HTTPS Webhook URL манзилини киритинг!';
+                    return;
+                }
+                formData.append('webhook_url', val);
+            }
+
+            try {
+                const res = await fetch("{% url 'api_telegram_set_webhook' %}", {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrfToken },
+                    body: formData
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    alertBox.style.background = 'rgba(16,185,129,0.15)';
+                    alertBox.style.color = '#34d399';
+                    if (action === 'info') {
+                        const d = data.result?.data || {};
+                        alertBox.innerHTML = `<b>Telegram Webhook Статус:</b><br>URL: <code>${d.url || 'Ўрнатилмаган (Polling фаол)'}</code><br>Кутилаётган новых хабарлар: <b>${d.pending_update_count || 0}</b>${d.last_error_message ? '<br><span style="color:#f87171;">Охирги хато: ' + d.last_error_message + '</span>' : ''}`;
+                    } else if (action === 'delete') {
+                        alertBox.innerText = '✅ ' + (data.result?.description || 'Вебхук ўчирилди. Polling режими фаоллашди.');
+                        const whBadge = document.getElementById('webhook-badge-text');
+                        if (whBadge) {
+                            whBadge.innerText = 'Polling (каждые 4с) 🔄';
+                            whBadge.style.background = 'rgba(56,189,248,0.15)';
+                            whBadge.style.color = '#38bdf8';
+                        }
+                    } else {
+                        alertBox.innerText = '✅ ' + (data.result?.description || 'Вебхук муваффақиятли ўрнатилди!');
+                        const whBadge = document.getElementById('webhook-badge-text');
+                        if (whBadge) {
+                            whBadge.innerText = 'Активен ✅';
+                            whBadge.style.background = 'rgba(16,185,129,0.15)';
+                            whBadge.style.color = '#34d399';
+                        }
+                    }
+                } else {
+                    alertBox.style.background = 'rgba(239,68,68,0.15)';
+                    alertBox.style.color = '#f87171';
+                    alertBox.innerText = '❌ ' + (data.error || data.result?.error || 'Хатолик юз берди');
+                }
+            } catch (err) {
+                alertBox.style.background = 'rgba(239,68,68,0.15)';
+                alertBox.style.color = '#f87171';
+                alertBox.innerText = '❌ Серверга уланишда хато: ' + err.message;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,248 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход в панель управления | Учебный центр</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        :root {
+            --bg: #f5f6fa;
+            --surface: #ffffff;
+            --border: #e2e8f0;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+        }
+
+        .login-page-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8fafc;
+            padding: 24px;
+        }
+
+        .login-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.08), 0 4px 6px -2px rgba(15, 23, 42, 0.04);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .login-icon {
+            width: 58px;
+            height: 58px;
+            background: #eff6ff;
+            color: var(--primary);
+            border-radius: 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
+        }
+
+        .login-header h2 {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--text-main);
+            margin: 0;
+        }
+
+        .login-header p {
+            color: var(--text-muted);
+            font-size: 13.5px;
+            margin-top: 6px;
+        }
+
+        .login-error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #b91c1c;
+            padding: 12px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            color: #334155;
+            margin-bottom: 6px;
+        }
+
+        .form-input {
+            width: 100%;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            color: var(--text-main);
+            padding: 11px 14px;
+            font-size: 14px;
+            outline: none;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .form-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        .info-hint-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin: 18px 0;
+            font-size: 12.5px;
+            color: #475569;
+            text-align: left;
+            line-height: 1.5;
+        }
+
+        .info-hint-box code {
+            color: #1e293b;
+            background: #e2e8f0;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-page-wrapper">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="login-icon">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <h2>Панель управления</h2>
+                <p>Вход для администратора учебного центра</p>
+            </div>
+
+            {% if error %}
+            <div class="login-error">
+                <i class="fa-solid fa-circle-exclamation"></i> {{ error }}
+            </div>
+            {% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="username">Логин</label>
+                    <input type="text" name="username" id="username" class="form-input" value="admin" required autofocus placeholder="Введите логин">
+                </div>
+                <div class="form-group">
+                    <label for="password">Пароль</label>
+                    <div style="position: relative;">
+                        <input type="password" name="password" id="password" class="form-input" placeholder="Введите пароль" required style="padding-right: 42px;">
+                        <span onclick="togglePassword()" style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #94a3b8; display: flex; align-items: center;">
+                            <i class="fa-solid fa-eye" id="eye-icon"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="info-hint-box">
+                    <div style="font-weight: 700; color: #1e293b; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                        Данные для входа:
+                    </div>
+                    Логин: <code>admin</code> &nbsp;|&nbsp; Пароль: <code>admin123password</code>
+                </div>
+
+                <button type="submit" class="btn-primary btn-block" style="margin-top: 10px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                    Войти в кабинет
+                </button>
+            </form>
+
+            <script>
+            function togglePassword() {
+                const passInput = document.getElementById('password');
+                const eyeIcon = document.getElementById('eye-icon');
+                if (passInput.type === 'password') {
+                    passInput.type = 'text';
+                    eyeIcon.classList.replace('fa-eye', 'fa-eye-slash');
+                } else {
+                    passInput.type = 'password';
+                    eyeIcon.classList.replace('fa-eye-slash', 'fa-eye');
+                }
+            }
+            </script>
+
+            <div style="text-align: center; margin-top: 24px;">
+                <a href="{% url 'home' %}" style="color: #64748b; font-size: 13px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                    Вернуться на сайт
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

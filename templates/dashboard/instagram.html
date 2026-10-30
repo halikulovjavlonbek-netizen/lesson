@@ -1,0 +1,1893 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Интеграция Instagram Direct (Meta API) | Учебный Центр CRM</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        /* ═══════════════════════════════════════════════════
+           🎨 UNIFIED ADMIN THEME — Оқ фон, Замонавий
+           ═══════════════════════════════════════════════════ */
+        :root {
+            --bg:        #f5f6fa;
+            --surface:   #ffffff;
+            --border:    #e5e7eb;
+            --primary:   #2563eb;
+            --primary-h: #1d4ed8;
+            --text:      #111827;
+            --text-2:    #334155;
+            --text-3:    #64748b;
+            --shadow-sm: 0 1px 3px 0 rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 16px -2px rgba(0,0,0,0.1);
+            --radius:    14px;
+            --radius-sm: 9px;
+        }
+        *, *::before, *::after { box-sizing: border-box; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+            margin: 0; padding: 0;
+        }
+        /* ── HEADER ── */
+        .dash-header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 0;
+            box-shadow: var(--shadow-sm);
+            position: sticky; top: 0; z-index: 100;
+        }
+        .dash-header-inner {
+            max-width: 1400px; margin: 0 auto; padding: 0 24px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .dash-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .dash-logo-icon {
+            width: 38px; height: 38px; border-radius: 10px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; color: #fff; flex-shrink: 0;
+        }
+        .dash-logo-text { font-size: 15px; font-weight: 800; color: var(--text); line-height: 1.2; }
+        .dash-logo-sub { font-size: 11px; color: var(--text-2); font-weight: 500; }
+        .dash-header-actions { display: flex; align-items: center; gap: 10px; }
+        .btn-hdr {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 8px 14px; border-radius: 9px; font-size: 13px; font-weight: 600;
+            text-decoration: none; border: 1px solid var(--border);
+            background: var(--surface); color: var(--text-2); cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .btn-hdr:hover { background: var(--bg); color: var(--text); }
+        .btn-hdr-danger { background: #fff0f0; border-color: #fecaca; color: #ef4444; }
+        .btn-hdr-danger:hover { background: #fee2e2; border-color: #ef4444; }
+        /* ── CONTAINER ── */
+        .dash-container { max-width: 1400px; margin: 0 auto; padding: 24px 24px 40px; }
+        /* ── NAV ROWS ── */
+        .dash-nav { display: flex; flex-direction: column; gap: 6px; margin-bottom: 24px; }
+        .dash-nav-row {
+            display: flex; gap: 4px;
+            background: var(--surface); padding: 5px;
+            border-radius: var(--radius); border: 1px solid var(--border);
+            overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none;
+        }
+        .dash-nav-row::-webkit-scrollbar { display: none; }
+        .dash-nav-label {
+            font-size: 10px; font-weight: 700; color: var(--text-3);
+            text-transform: uppercase; letter-spacing: 0.6px;
+            padding: 2px 8px; align-self: center; flex-shrink: 0;
+        }
+        .nav-divider { width: 1px; background: var(--border); margin: 4px 2px; flex-shrink: 0; }
+        .dash-tab {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 7px 13px; border-radius: var(--radius-sm);
+            font-size: 13px; font-weight: 600; color: var(--text-2);
+            text-decoration: none; white-space: nowrap; flex-shrink: 0;
+            transition: all 0.15s ease; border: 1px solid transparent;
+        }
+        .dash-tab:hover { background: var(--bg); color: var(--text); }
+        .dash-tab.active { background: var(--primary); color: #fff; box-shadow: 0 3px 10px rgba(37,99,235,0.3); }
+        .dash-tab.active-tg { background: #0284c7; color: #fff; box-shadow: 0 3px 10px rgba(2,132,199,0.3); }
+        .dash-tab.active-ig { background: linear-gradient(135deg,#c13584,#e1306c); color: #fff; box-shadow: 0 3px 10px rgba(225,48,108,0.3); }
+        .tab-badge {
+            background: rgba(0,0,0,0.1); padding: 1px 6px; border-radius: 20px; font-size: 11px; font-weight: 700;
+        }
+        .dash-tab.active .tab-badge, .dash-tab.active-tg .tab-badge, .dash-tab.active-ig .tab-badge {
+            background: rgba(255,255,255,0.25);
+        }
+        /* ── PANELS ── */
+        .panel-box {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 24px;
+            box-shadow: var(--shadow-sm); margin-bottom: 20px;
+        }
+        .panel-title {
+            font-size: 17px; font-weight: 700; color: var(--text);
+            margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between;
+        }
+        /* ── STAT CARDS ── */
+        .dash-stats-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 16px; margin-bottom: 24px; }
+        .stat-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 20px;
+            display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow-sm);
+        }
+        .stat-card-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+        .icon-blue   { background: #eff6ff; color: #2563eb; }
+        .icon-green  { background: #f0fdf4; color: #16a34a; }
+        .icon-amber  { background: #fffbeb; color: #d97706; }
+        .icon-purple { background: #faf5ff; color: #7c3aed; }
+        .icon-red    { background: #fff1f2; color: #e11d48; }
+        .icon-wa     { background: #f0fdf4; color: #16a34a; }
+        .stat-card h3 { font-size: 22px; font-weight: 800; margin: 0 0 2px; color: var(--text); }
+        .stat-card p  { font-size: 13px; color: var(--text-2); margin: 0; }
+        /* ── TABLE ── */
+        .leads-table-wrapper { overflow-x: auto; border-radius: 10px; border: 1px solid var(--border); }
+        .leads-table { width: 100%; border-collapse: collapse; text-align: left; min-width: 700px; }
+        .leads-table th { padding: 12px 14px; background: #f9fafb; color: var(--text-2); font-size: 12px; font-weight: 700; border-bottom: 1px solid var(--border); white-space: nowrap; text-transform: uppercase; letter-spacing: 0.4px; }
+        .leads-table td { padding: 14px; border-bottom: 1px solid #f3f4f6; font-size: 13.5px; vertical-align: middle; color: var(--text); }
+        .leads-table tr:last-child td { border-bottom: none; }
+        .leads-table tr:hover td { background: #fafafa; }
+        /* ── STATUS BADGES ── */
+        .status-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 11px; border-radius: 9999px; font-size: 12px; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
+        .status-new       { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+        .status-progress  { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+        .status-paid      { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+        .status-cancelled { background: #fff1f2; color: #e11d48; border: 1px solid #fecdd3; }
+        /* ── ACTION BUTTONS ── */
+        .table-actions { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+        .btn-table-action {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600;
+            background: #f8fafc; border: 1px solid var(--border); color: var(--text);
+            cursor: pointer; text-decoration: none; transition: all 0.15s ease; white-space: nowrap;
+        }
+        .btn-table-action:hover { background: #f1f5f9; border-color: #cbd5e1; }
+        .btn-table-danger {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 30px; height: 30px; border-radius: 8px;
+            background: #fff1f2; border: 1px solid #fecdd3; color: #e11d48;
+            cursor: pointer; text-decoration: none; transition: all 0.15s ease; flex-shrink: 0;
+        }
+        .btn-table-danger:hover { background: #fee2e2; border-color: #fca5a5; }
+        /* ── FORMS ── */
+        .form-input, .form-textarea, .form-select {
+            width: 100%; background: #f9fafb; border: 1px solid var(--border);
+            border-radius: 9px; color: var(--text); padding: 10px 14px;
+            font-size: 13.5px; outline: none; box-sizing: border-box;
+            font-family: inherit; transition: all 0.15s ease;
+        }
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.12); background: #fff;
+        }
+        .form-label { display: block; font-size: 12px; font-weight: 700; color: var(--text-2); margin-bottom: 6px; }
+        .form-group { margin-bottom: 14px; }
+        /* ── BUTTONS ── */
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 9px; font-size: 13.5px; font-weight: 700; border: none; cursor: pointer; text-decoration: none; transition: all 0.15s ease; white-space: nowrap; }
+        .btn-primary { background: var(--primary); color: #fff; }
+        .btn-primary:hover { background: var(--primary-h); }
+        .btn-outline { background: #fff; color: var(--text); border: 1px solid var(--border); }
+        .btn-outline:hover { background: var(--bg); }
+        .btn-accent { background: #10b981; color: #fff; }
+        .btn-accent:hover { background: #059669; }
+        .btn-block { width: 100%; justify-content: center; }
+        /* ── TEXT ── */
+        .client-name { font-weight: 700; color: var(--text); display: block; font-size: 14px; }
+        .client-date { font-size: 12px; color: var(--text-3); }
+        .client-course { color: #2563eb; font-weight: 600; font-size: 13px; }
+        .lead-msg-bubble { font-size: 12px; color: var(--text-2); margin-top: 6px; background: #f9fafb; border: 1px solid var(--border); border-radius: 7px; padding: 5px 9px; max-width: 280px; max-height: 60px; overflow-y: auto; word-break: break-word; line-height: 1.4; }
+        /* ── WA BUTTON ── */
+        .btn-wa-chat { background: #16a34a; color: #fff !important; padding: 7px 13px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s ease; white-space: nowrap; }
+        .btn-wa-chat:hover { background: #15803d; }
+        /* ── ANALYTICS ── */
+        .analytics-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap: 16px; margin-bottom: 24px; }
+        .metric-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow-sm); }
+        .metric-title { font-size: 12px; color: var(--text-2); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+        .metric-val { font-size: 26px; font-weight: 800; color: var(--text); }
+        .metric-sub { font-size: 12px; margin-top: 6px; color: var(--text-2); }
+        .val-green { color: #16a34a; }
+        .val-amber { color: #d97706; }
+        .val-red { color: #e11d48; }
+        .val-blue { color: #2563eb; }
+        .progress-bar-bg { background: #f3f4f6; height: 8px; border-radius: 8px; overflow: hidden; margin-top: 8px; }
+        .progress-bar-fill { height: 100%; border-radius: 8px; }
+        /* ── MESSAGES ── */
+        .dash-messages { margin-bottom: 20px; }
+        .dash-msg-ok { background: #f0fdf4; border: 1px solid #86efac; color: #166534; padding: 12px 16px; border-radius: 10px; display: flex; align-items: center; gap: 10px; font-size: 13.5px; font-weight: 600; margin-bottom: 8px; }
+        .dash-msg-err { background: #fff1f2; border: 1px solid #fca5a5; color: #9f1239; padding: 12px 16px; border-radius: 10px; display: flex; align-items: center; gap: 10px; font-size: 13.5px; font-weight: 600; margin-bottom: 8px; }
+        
+        /* Instagram page specific light theme overrides */
+        .step-item { display: flex; gap: 14px; margin-bottom: 16px; }
+        .step-num {
+            width: 28px; height: 28px; border-radius: 50%;
+            background: linear-gradient(135deg, #c13584, #e1306c);
+            color: #fff; display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 800; flex-shrink: 0;
+        }
+        .step-title { font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 3px; }
+        .step-desc { font-size: 12.5px; color: #475569; line-height: 1.4; }
+        .copy-box {
+            display: flex; align-items: center; gap: 8px;
+            background: #f8fafc; padding: 8px 12px;
+            border-radius: 10px; border: 1px dashed #cbd5e1;
+        }
+        .copy-text { font-family: monospace; font-size: 12px; color: #0369a1; font-weight: 700; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .copy-btn { background: #e2e8f0; border: none; color: #1e293b; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 700; }
+        .copy-btn:hover { background: #2563eb; color: #fff; }
+        .btn-ig-gradient {
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            color: #fff !important; padding: 12px 22px; border-radius: 12px;
+            font-weight: 700; font-size: 14px; border: none; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 10px; text-decoration: none;
+            box-shadow: 0 4px 16px rgba(225, 48, 108, 0.35); transition: all 0.2s ease;
+        }
+        .btn-ig-gradient:hover { opacity: 0.94; transform: translateY(-1px); }
+        .ig-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 24px; margin-bottom: 28px; }
+
+        /* ── MAIN GRID ── */
+        .dash-main-grid { display: grid; grid-template-columns: minmax(0,1fr) 360px; gap: 24px; }
+        .dash-main-grid > div { min-width: 0; }
+        @media (max-width: 1100px) { .dash-main-grid { grid-template-columns: 1fr; } }
+
+    </style>
+</head>
+<body>
+
+    <!-- Шапка -->
+        <header class="dash-header">
+        <div class="dash-header-inner">
+            <a href="{% url 'admin_dashboard' %}" class="dash-logo">
+                <div class="dash-logo-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                </div>
+                <div>
+                    <div class="dash-logo-text">Учебный Центр CRM</div>
+                    <div class="dash-logo-sub">Панель Управления</div>
+                </div>
+            </a>
+            <div class="dash-header-actions">
+                <a href="{% url 'home' %}" target="_blank" class="btn-hdr">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    Сайт
+                </a>
+                <a href="{% url 'admin_logout' %}" class="btn-hdr btn-hdr-danger">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    Выход
+                </a>
+            </div>
+        </div>
+    </header>
+
+
+    <div class="dash-container">
+
+        {% if messages %}
+        <div class="dash-messages">
+            {% for msg in messages %}
+            {% if msg.tags == 'error' %}
+            <div class="dash-msg-err">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                {{ msg }}
+            </div>
+            {% else %}
+            <div class="dash-msg-ok">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                {{ msg }}
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Навигация Таблари -->
+        <div class="dash-nav">
+            <div class="dash-nav-row">
+                <span class="dash-nav-label">CRM</span>
+                <div class="nav-divider"></div>
+                <a href="{% url 'admin_dashboard' %}?tab=leads" class="dash-tab">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="m9 12 2 2 4-4"/></svg>
+                    Заявки
+                </a>
+                <a href="{% url 'admin_dashboard' %}?tab=staff" class="dash-tab">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    Сотрудники
+                </a>
+                <a href="{% url 'admin_dashboard' %}?tab=rent" class="dash-tab">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    Аренда
+                </a>
+                <a href="{% url 'admin_dashboard' %}?tab=analytics" class="dash-tab">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                    Аналитика
+                </a>
+                <a href="{% url 'dashboard_kanban' %}" class="dash-tab">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    Kanban CRM
+                </a>
+            </div>
+            <div class="dash-nav-row">
+                <span class="dash-nav-label">Мессенджеры</span>
+                <div class="nav-divider"></div>
+                <a href="{% url 'admin_dashboard' %}?tab=leads" class="dash-tab" style="color:#16a34a;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.746.953 3.71 1.456 5.711 1.456h.005c6.554 0 11.89-5.336 11.893-11.893a11.821 11.821 0 00-3.48-8.414z"/></svg>
+                    WhatsApp
+                </a>
+                <a href="{% url 'dashboard_telegram' %}" class="dash-tab" style="color:#0284c7;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.75-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
+                    Telegram
+                </a>
+                <a href="{% url 'dashboard_instagram' %}" class="dash-tab" style="color:#c13584;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                    Instagram
+                </a>
+                <div class="nav-divider"></div>
+                <span class="dash-nav-label">Обучение</span>
+                <div class="nav-divider"></div>
+                <a href="{% url 'dashboard_schedule' %}" class="dash-tab">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    Расписание
+                </a>
+                <a href="{% url 'dashboard_teachers' %}" class="dash-tab">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                    Преподаватели
+                </a>
+                <a href="{% url 'dashboard_groups' %}" class="dash-tab">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    Группы
+                </a>
+                <a href="{% url 'dashboard_schedule_settings' %}" class="dash-tab">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    Настройки
+                </a>
+            </div>
+        </div>
+
+
+        <!-- Статус Баннери (Оқ, силлиқ ва тўқ қора ёзувли) -->
+        <div class="panel-box" style="margin-bottom: 24px; background: #ffffff; border: 1px solid #fbcfe8; box-shadow: 0 4px 20px -2px rgba(225,48,108,0.08);">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <div style="width: 52px; height: 52px; border-radius: 16px; background: linear-gradient(45deg, #f09433, #dc2743, #bc1888); display: flex; align-items: center; justify-content: center; font-size: 26px; color: #fff; box-shadow: 0 8px 24px rgba(225,48,108,0.3); flex-shrink: 0;">
+                        <i class="fa-brands fa-instagram"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 18px; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 10px;">
+                            Instagram Direct Message (Официальный Meta API)
+                            {% if status_data.is_connected %}
+                                <span style="background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 5px;"><i class="fa-solid fa-circle-check" style="color: #16a34a;"></i> Подключено</span>
+                            {% else %}
+                                <span style="background: #fff1f2; color: #9f1239; border: 1px solid #fecdd3; font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 5px;"><i class="fa-solid fa-circle-xmark" style="color: #e11d48;"></i> Не подключено</span>
+                            {% endif %}
+                        </div>
+                        <div style="font-size: 13.5px; color: #334155; margin-top: 5px; font-weight: 500;">
+                            {% if status_data.is_connected %}
+                                Аккаунт: <b style="color: #0f172a; font-weight: 800;">@{{ status_data.ig_username }}</b> (ID: <code style="background: #f1f5f9; color: #0f172a; padding: 2px 6px; border-radius: 4px; font-weight: 700;">{{ status_data.ig_user_id }}</code>) • Срок действия токена: <span style="color: #15803d; font-weight: 800;">{{ status_data.days_left }} дн.</span>
+                            {% else %}
+                                Подключите аккаунт Instagram Business/Creator через официальный OAuth (пароль не требуется)
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <!-- Credentials Login (Username + Пароль) tugmasi — HAMISHA ko'rinadi -->
+                    <button onclick="openIgLoginModal()" style="
+                        background: linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+                        color: #fff;
+                        border: none;
+                        border-radius: 12px;
+                        padding: 10px 18px;
+                        font-size: 13px;
+                        font-weight: 700;
+                        cursor: pointer;
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 8px;
+                        box-shadow: 0 4px 16px rgba(225, 48, 108, 0.4);
+                        transition: all 0.2s ease;
+                    " onmouseover="this.style.opacity='0.9'; this.style.transform='translateY(-1px)'" onmouseout="this.style.opacity='1'; this.style.transform='translateY(0)'">
+                        <i class="fa-brands fa-instagram"></i>
+                        {% if status_data.is_connected %}Другой аккаунт{% else %}Вход по логину{% endif %}
+                    </button>
+
+                    {% if status_data.is_connected %}
+                        <button onclick="syncInstagramMessages()" class="btn" style="background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); padding: 9px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                            <i class="fa-solid fa-rotate"></i> <span id="syncBtnText">Проверить сообщения (Kanban)</span>
+                        </button>
+                        <button onclick="disconnectInstagram()" class="btn" style="background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); padding: 9px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;">
+                            <i class="fa-solid fa-unlink"></i> Отключить аккаунт
+                        </button>
+                    {% else %}
+                        {% if oauth_url %}
+                            <a href="{{ oauth_url }}" class="btn" style="background: rgba(255,255,255,0.08); color: #9ca3af; border: 1px solid rgba(255,255,255,0.15); padding: 9px 16px; border-radius: 10px; font-size: 12px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                                <i class="fa-solid fa-arrow-up-right-from-square"></i> OAuth (официальный)
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {% if status_data.is_connected %}
+        <!-- ═══════════════════════════════════════════════════════════════
+             INSTAGRAM PROFIL KARTI (Оқ фон, тўқ қора ва аниқ ёзувлар)
+             ═══════════════════════════════════════════════════════════════ -->
+        <div class="panel-box" style="
+            margin-bottom: 24px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 18px;
+            padding: 24px 28px;
+            box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.06);
+        ">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+
+                <!-- Chap taraf: Avatar, Username, Ism, Bio -->
+                <div style="display: flex; align-items: center; gap: 18px; min-width: 260px;">
+                    <!-- Instagram signature gradient ring avatar -->
+                    <div style="
+                        width: 76px;
+                        height: 76px;
+                        border-radius: 50%;
+                        padding: 3px;
+                        background: linear-gradient(45deg, #f09433, #dc2743, #bc1888);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        box-shadow: 0 6px 20px rgba(225, 48, 108, 0.4);
+                        flex-shrink: 0;
+                    ">
+                        <div style="
+                            width: 100%;
+                            height: 100%;
+                            border-radius: 50%;
+                            background: #ffffff;
+                            padding: 2px;
+                            overflow: hidden;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                        ">
+                            {% if status_data.profile_pic_url %}
+                                <img src="{{ status_data.profile_pic_url }}" id="igProfileAvatarImg" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                            {% else %}
+                                <span id="igProfileAvatarFallback" style="font-size: 28px; font-weight: 800; color: #fff; text-transform: uppercase;">
+                                    {{ status_data.ig_username|slice:":1"|default:"I" }}
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Ism va Username -->
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span id="igCardUsername" style="font-size: 22px; font-weight: 800; color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                                @{{ status_data.ig_username }}
+                            </span>
+                            <span style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; font-size: 11px; padding: 2px 8px; border-radius: 6px; font-weight: 800;">
+                                <i class="fa-solid fa-circle-check"></i> Активен
+                            </span>
+                        </div>
+                        <div id="igCardFullName" style="font-size: 14.5px; font-weight: 700; color: #1e293b; margin-top: 3px;">
+                            {{ status_data.full_name|default:status_data.ig_username }}
+                        </div>
+                        {% if status_data.bio %}
+                            <div id="igCardBio" style="font-size: 13px; color: #475569; margin-top: 4px; max-width: 360px; line-height: 1.4; font-weight: 500;">
+                                {{ status_data.bio }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- O'rtadagi 3 ta Statistika: Публикации, Подписчики, Подписки (Тиниқ ва қора ёзувлар) -->
+                <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+
+                    <!-- 1. Публикации (Posts) -->
+                    <div style="
+                        background: #f8fafc;
+                        border: 1px solid #e2e8f0;
+                        border-radius: 12px;
+                        padding: 12px 22px;
+                        text-align: center;
+                        min-width: 105px;
+                        transition: transform 0.2s;
+                    ">
+                        <div id="igCardPosts" style="font-size: 24px; font-weight: 800; color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                            {{ status_data.media_count|default:"0" }}
+                        </div>
+                        <div style="font-size: 11.5px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 3px;">
+                            Публикации
+                        </div>
+                    </div>
+
+                    <!-- 2. Подписчики (Followers) -->
+                    <div style="
+                        background: #fdf2f8;
+                        border: 1px solid #fbcfe8;
+                        border-radius: 12px;
+                        padding: 12px 22px;
+                        text-align: center;
+                        min-width: 115px;
+                        transition: transform 0.2s;
+                    ">
+                        <div id="igCardFollowers" style="font-size: 24px; font-weight: 800; color: #be185d; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                            {{ status_data.followers_count|default:"0" }}
+                        </div>
+                        <div style="font-size: 11.5px; font-weight: 800; color: #9d174d; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 3px;">
+                            Подписчики
+                        </div>
+                    </div>
+
+                    <!-- 3. Подписки (Following) -->
+                    <div style="
+                        background: #f8fafc;
+                        border: 1px solid #e2e8f0;
+                        border-radius: 12px;
+                        padding: 12px 22px;
+                        text-align: center;
+                        min-width: 105px;
+                        transition: transform 0.2s;
+                    ">
+                        <div id="igCardFollowing" style="font-size: 24px; font-weight: 800; color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                            {{ status_data.following_count|default:"0" }}
+                        </div>
+                        <div style="font-size: 11.5px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 3px;">
+                            Подписки
+                        </div>
+                    </div>
+                </div>
+
+                <!-- O'ng taraf: Редактировать va profilga o'tish tugmalari -->
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <button type="button" onclick="openIgStatsEditModal()" class="btn" style="
+                        background: #f1f5f9;
+                        color: #0f172a;
+                        border: 1px solid #cbd5e1;
+                        padding: 10px 16px;
+                        border-radius: 10px;
+                        font-size: 12.5px;
+                        font-weight: 700;
+                        cursor: pointer;
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 6px;
+                        transition: all 0.2s;
+                    " onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">
+                        <i class="fa-solid fa-pen-to-square"></i> Редактировать
+                    </button>
+                    <a href="https://instagram.com/{{ status_data.ig_username }}" target="_blank" class="btn" style="
+                        background: linear-gradient(135deg, #f09433, #dc2743);
+                        color: #ffffff;
+                        border: none;
+                        padding: 10px 16px;
+                        border-radius: 10px;
+                        font-size: 12.5px;
+                        font-weight: 700;
+                        text-decoration: none;
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 6px;
+                        box-shadow: 0 4px 14px rgba(220, 39, 67, 0.35);
+                        transition: opacity 0.2s;
+                    " onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+                        <i class="fa-brands fa-instagram"></i> Открыть профиль ↗
+                    </a>
+                </div>
+
+            </div>
+        </div>
+        {% endif %}
+
+        {% if status_data.is_connected %}
+        <!-- ═══════════════════════════════════════════════════════
+             WEBHOOK HOLATI BLOKI
+             ═══════════════════════════════════════════════════════ -->
+        <div class="panel-box" style="margin-bottom: 24px; border-color: {% if status_data.last_webhook_time %}rgba(16,185,129,0.3){% else %}rgba(251,191,36,0.3){% endif %}; background: {% if status_data.last_webhook_time %}rgba(16,185,129,0.05){% else %}rgba(251,191,36,0.05){% endif %};">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+
+                <!-- Chap: Status -->
+                <div style="flex: 1; min-width: 260px;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                        <div style="width: 36px; height: 36px; border-radius: 10px; background: {% if status_data.last_webhook_time %}rgba(16,185,129,0.2){% else %}rgba(251,191,36,0.2){% endif %}; display: flex; align-items: center; justify-content: center; font-size: 16px;">
+                            {% if status_data.last_webhook_time %}
+                                <i class="fa-solid fa-circle-check" style="color: #34d399;"></i>
+                            {% else %}
+                                <i class="fa-solid fa-triangle-exclamation" style="color: #fbbf24;"></i>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <div style="font-size: 15px; font-weight: 800; color: #0f172a;">
+                                {% if status_data.last_webhook_time %}
+                                    Webhook активен ✅
+                                {% else %}
+                                    Ожидание входящих сообщений Webhook ⚠️
+                                {% endif %}
+                            </div>
+                            <div style="font-size: 13px; color: #475569; margin-top: 2px;">
+                                {% if status_data.is_session_mode %}
+                                    Режим: <b style="color: #7c3aed; font-weight: 800;">instagrapi polling</b> (без Meta webhook)
+                                {% else %}
+                                    Режим: <b style="color: #0284c7; font-weight: 800;">Meta Graph API Webhook</b>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        {% if status_data.last_webhook_time %}
+                        <div style="display: flex; align-items: center; gap: 8px; font-size: 13px;">
+                            <i class="fa-solid fa-clock" style="color: #34d399; width: 14px;"></i>
+                            <span style="color: #334155; font-weight: 600;">Последнее сообщение:</span>
+                            <b style="color: #15803d; font-weight: 800;">{{ status_data.last_webhook_time }}</b>
+                            {% if status_data.last_webhook_ago %}
+                            <span style="color: #64748b;">({{ status_data.last_webhook_ago }})</span>
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        <div style="font-size: 12px; color: #fbbf24; padding: 8px 12px; background: rgba(251,191,36,0.08); border-radius: 8px; border: 1px solid rgba(251,191,36,0.2);">
+                            <i class="fa-solid fa-info-circle"></i>
+                            Сообщения Instagram DM пока не поступали. Когда клиент напишет в Direct или при нажатии кнопки «Проверить сообщения», новые обращения автоматически появятся на Канбан-доске.
+                        </div>
+                        {% endif %}
+
+                        {% if not status_data.is_session_mode %}
+                        <!-- Webhook URL va Verify Token (nusxalash uchun) -->
+                        <div style="margin-top: 4px;">
+                            <div style="font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Webhook URL (для Meta Console):</div>
+                            <div class="copy-box">
+                                <span class="copy-text" id="webhookUrlText">{{ request.scheme }}://{{ request.get_host }}/api/instagram/webhook/</span>
+                                <button class="copy-btn" onclick="copyToClipboard('webhookUrlText')"><i class="fa-solid fa-copy"></i></button>
+                            </div>
+                        </div>
+                        <div>
+                            <div style="font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Verify Token:</div>
+                            <div class="copy-box">
+                                <span class="copy-text" id="verifyTokenText">{{ status_data.verify_token }}</span>
+                                <button class="copy-btn" onclick="copyToClipboard('verifyTokenText')"><i class="fa-solid fa-copy"></i></button>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- O'ng: Tugmalar -->
+                <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
+                    <!-- Проверить сообщения -->
+                    <button onclick="syncInstagramMessages()" style="
+                        background: linear-gradient(135deg, #059669, #10b981);
+                        color: #fff; border: none; border-radius: 10px;
+                        padding: 10px 18px; font-size: 13px; font-weight: 700;
+                        cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+                        box-shadow: 0 4px 14px rgba(16,185,129,0.35);
+                        transition: all 0.2s;
+                    " onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+                        <i class="fa-solid fa-rotate" id="syncIconBtn"></i>
+                        <span id="syncBtnText2">Проверить сообщения</span>
+                    </button>
+
+                    {% if not status_data.is_session_mode %}
+                    <!-- Webhook subscription yoqish -->
+                    <button onclick="activateWebhookSubscription()" id="subscribeWebhookBtn" style="
+                        background: rgba(56,189,248,0.12);
+                        color: #38bdf8; border: 1px solid rgba(56,189,248,0.3); border-radius: 10px;
+                        padding: 9px 16px; font-size: 12px; font-weight: 700;
+                        cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+                        transition: all 0.2s;
+                    ">
+                        <i class="fa-solid fa-plug"></i> Webhook'ni yoqish (subscribe)
+                    </button>
+                    <!-- Subscription holat tekshirish -->
+                    <button onclick="checkWebhookSubscription()" style="
+                        background: rgba(255,255,255,0.05);
+                        color: #475569; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;
+                        padding: 8px 14px; font-size: 11px; font-weight: 600;
+                        cursor: pointer; display: inline-flex; align-items: center; gap: 5px;
+                    ">
+                        <i class="fa-solid fa-magnifying-glass"></i> Subscription holat
+                    </button>
+                    <div id="subscriptionStatusDiv" style="font-size: 11px; color: #64748b; text-align: right; max-width: 220px;"></div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Асосий 2 Колонкали Сетка -->
+        <div class="ig-grid">
+
+            <!-- Чап колонка: OAuth ва API Настройкии -->
+            <div>
+                <!-- OAuth Уланиш Карточкаси -->
+                <div class="panel-box" style="margin-bottom: 24px;">
+                    <div class="panel-title">
+                        <span><i class="fa-solid fa-shield-halved" style="color: #e1306c;"></i> 1. Официальное подключение OAuth</span>
+                        <span style="font-size: 11px; color: #475569; font-weight: 500;">Официально и безопасно</span>
+                    </div>
+
+                    <div style="background: #fdf2f8; border: 1px solid #fbcfe8; padding: 14px; border-radius: 12px; margin-bottom: 18px;">
+                        <p style="font-size: 13.5px; color: #1e293b; margin: 0 0 8px 0; line-height: 1.5;">
+                            <b style="color: #991b1b;">Никогда не вводите пароль от Instagram!</b> Подключение выполняется напрямую и безопасно через Meta (Instagram Login API).
+                        </p>
+                        <p style="font-size: 12.5px; color: #475569; margin: 0; font-weight: 600;">
+                            Аккаунт Instagram обязательно должен быть профессиональным (Business или Creator).
+                        </p>
+                    </div>
+
+                    <div class="step-item">
+                        <div class="step-num">1</div>
+                        <div class="step-content">
+                            <div class="step-title">Настройка приложения в Meta for Developers</div>
+                            <div class="step-desc">Заполните App ID и App Secret в форме ниже и нажмите «Сохранить».</div>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-num">2</div>
+                        <div class="step-content">
+                            <div class="step-title">Нажмите кнопку «Подключить Instagram»</div>
+                            <div class="step-desc">Откроется официальная страница Meta: войдите в Instagram и подтвердите доступ.</div>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-num">3</div>
+                        <div class="step-content">
+                            <div class="step-title">Токен автоматически обновляется</div>
+                            <div class="step-desc">Система автоматически обменивает кратковременный токен на долгосрочный (60 дней) и обновляет его заранее без вашего участия.</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 20px; text-align: center;">
+                        {% if oauth_url %}
+                            <a href="{{ oauth_url }}" class="btn-ig-gradient" style="width: 100%; justify-content: center; box-sizing: border-box;">
+                                <i class="fa-brands fa-instagram" style="font-size: 18px;"></i>
+                                {% if status_data.is_connected %}
+                                    Подключить другой аккаунт Instagram
+                                {% else %}
+                                    Подключить Instagram через OAuth
+                                {% endif %}
+                            </a>
+                        {% else %}
+                            <div style="font-size: 12px; color: #f87171; background: rgba(239,68,68,0.1); padding: 10px; border-radius: 8px;">
+                                <i class="fa-solid fa-triangle-exclamation"></i> Для подключения введите Meta <b>App ID</b> и <b>App Secret</b> в форме ниже и сохраните.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- API Credentials Настройкии -->
+                <div class="panel-box">
+                    <div class="panel-title">
+                        <span><i class="fa-solid fa-sliders" style="color: #38bdf8;"></i> 2. Настройки Meta App (API Credentials)</span>
+                    </div>
+
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="save_credentials" value="1">
+
+                        <div style="margin-bottom: 14px;">
+                            <label class="form-label">Meta App ID (Client ID)</label>
+                            <input type="text" id="app_id_input" name="app_id" value="{{ ig_settings.app_id }}" placeholder="Масалан: 183928492048592" class="form-input" required>
+                        </div>
+
+                        <div style="margin-bottom: 14px;">
+                            <label class="form-label">Meta App Secret (Client Secret)</label>
+                            <input type="password" name="app_secret" value="{{ ig_settings.app_secret }}" placeholder="Масалан: a7f8c9b2e1d4..." class="form-input" required>
+                        </div>
+
+                        <div style="margin-bottom: 14px;">
+                            <label class="form-label">Webhook Verify Token (произвольный секрет)</label>
+                            <input type="text" name="verify_token" value="{{ ig_settings.verify_token|default:'edu_center_ig_verify_2026' }}" class="form-input">
+                        </div>
+
+                        <div style="margin-bottom: 18px;">
+                            <label class="form-label">OAuth Valid Redirect URI (скопируйте в Meta Console)</label>
+                            <div class="copy-box">
+                                <span class="copy-text" id="redirect_uri_text">{{ ig_settings.redirect_uri|default:default_redirect }}</span>
+                                <button type="button" class="copy-btn" onclick="copyText('redirect_uri_text')"><i class="fa-regular fa-copy"></i> Копия</button>
+                            </div>
+                            <input type="hidden" name="redirect_uri" value="{{ ig_settings.redirect_uri|default:default_redirect }}">
+                        </div>
+
+                        <button type="submit" class="btn" style="background: #2563eb; color: #fff; border: none; padding: 11px 20px; border-radius: 10px; font-weight: 700; font-size: 13px; width: 100%; cursor: pointer;">
+                            <i class="fa-solid fa-floppy-disk"></i> Сохранить настройки
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Ўнг колонка: Webhook ва Тест қилиш -->
+            <div>
+                <!-- Webhook Настройкии -->
+                <div class="panel-box" style="margin-bottom: 24px;">
+                    <div class="panel-title">
+                        <span><i class="fa-solid fa-bolt" style="color: #fbbf24;"></i> 3. Настройка Webhook в Meta Console</span>
+                    </div>
+
+                    <p style="font-size: 13px; color: #475569; line-height: 1.5; margin-bottom: 16px;">
+                        Чтобы сообщения из Instagram Direct моментально поступали на сайт, укажите Webhook в Meta Developer Console:
+                    </p>
+
+                    <div style="margin-bottom: 14px;">
+                        <label class="form-label">Callback URL</label>
+                        <div class="copy-box">
+                            <span class="copy-text" id="webhook_url_text">{{ webhook_callback_url }}</span>
+                            <button type="button" class="copy-btn" onclick="copyText('webhook_url_text')"><i class="fa-regular fa-copy"></i> Копия</button>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 14px;">
+                        <label class="form-label">Verify Token</label>
+                        <div class="copy-box">
+                            <span class="copy-text" id="verify_token_text">{{ ig_settings.verify_token|default:'edu_center_ig_verify_2026' }}</span>
+                            <button type="button" class="copy-btn" onclick="copyText('verify_token_text')"><i class="fa-regular fa-copy"></i> Копия</button>
+                        </div>
+                    </div>
+
+                    <div style="background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0;">
+                        <div style="font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 6px;">Обязательные поля подписки (Subscription Fields):</div>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <span style="background: rgba(16,185,129,0.15); color: #34d399; font-size: 11px; padding: 3px 8px; border-radius: 6px; font-family: monospace;">messages</span>
+                            <span style="background: rgba(16,185,129,0.15); color: #34d399; font-size: 11px; padding: 3px 8px; border-radius: 6px; font-family: monospace;">messaging_postbacks</span>
+                            <span style="background: rgba(16,185,129,0.15); color: #34d399; font-size: 11px; padding: 3px 8px; border-radius: 6px; font-family: monospace;">message_deliveries</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Симуляция хабари (Тест панели) -->
+                <div class="panel-box">
+                    <div class="panel-title">
+                        <span><i class="fa-solid fa-flask" style="color: #a855f7;"></i> 4. Тестирование входящих сообщений</span>
+                        <span style="font-size: 11px; color: #c084fc;">Тест-симулятор</span>
+                    </div>
+
+                    <p style="font-size: 12px; color: #475569; margin-bottom: 14px;">
+                        Даже если Meta Webhook еще не настроен, вы можете отправить тестовое сообщение клиента. Оно сразу появится на Канбан-доске!
+                    </p>
+
+                    <div style="margin-bottom: 12px;">
+                        <label class="form-label">Тестовый IGSID (ID клиента в Instagram)</label>
+                        <input type="text" id="sim_igsid" value="client_ig_{{ ig_settings.id|default:'101' }}" class="form-input">
+                    </div>
+
+                    <div style="margin-bottom: 14px;">
+                        <label class="form-label">Текст тестового сообщения</label>
+                        <input type="text" id="sim_text" value="Здравствуйте! Подскажите, пожалуйста, стоимость курсов английского и IT?" class="form-input">
+                    </div>
+
+                    <button onclick="simulateInstagramMessage()" class="btn" style="background: #9333ea; color: #fff; border: none; padding: 10px 18px; border-radius: 10px; font-weight: 700; font-size: 13px; width: 100%; cursor: pointer;">
+                        <i class="fa-solid fa-paper-plane"></i> Отправить тестовое сообщение (поступит в Канбан)
+                    </button>
+                    <div id="sim_result" style="margin-top: 10px; font-size: 12px; display: none;"></div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Охирги Instagram Хабарлари Расписаниеи -->
+        <div class="panel-box" style="margin-bottom: 28px;">
+            <div class="panel-title">
+                <span><i class="fa-solid fa-comments" style="color: #e1306c;"></i> Последние сообщения Instagram Direct</span>
+                <a href="{% url 'dashboard_kanban' %}?source=instagram" class="btn" style="background: rgba(225,48,108,0.15); color: #f472b6; border: 1px solid rgba(225,48,108,0.3); padding: 5px 12px; border-radius: 8px; font-size: 12px; text-decoration: none;">
+                    <i class="fa-solid fa-table-columns"></i> Открыть в Kanban
+                </a>
+            </div>
+
+            {% if recent_messages %}
+                <div style="overflow-x: auto;">
+                    <table class="msg-table">
+                        <thead>
+                            <tr>
+                                <th>Направление</th>
+                                <th>IGSID</th>
+                                <th>Сообщение</th>
+                                <th>Время</th>
+                                <th>Связанный лид</th>
+                                <th>Действие</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for m in recent_messages %}
+                                <tr>
+                                    <td>
+                                        {% if m.direction == 'in' %}
+                                            <span style="background: rgba(16,185,129,0.15); color: #34d399; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;">
+                                                <i class="fa-solid fa-arrow-down-left"></i> Входящее
+                                            </span>
+                                        {% else %}
+                                            <span style="background: rgba(56,189,248,0.15); color: #38bdf8; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;">
+                                                <i class="fa-solid fa-arrow-up-right"></i> Исходящее
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td><code>{{ m.sender_igsid }}</code></td>
+                                    <td style="max-width: 320px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ m.text }}</td>
+                                    <td style="color: #475569; font-size: 12px;">{{ m.timestamp|date:"d.m.Y H:i" }}</td>
+                                    <td>
+                                        {% if m.lead %}
+                                            <a href="{% url 'dashboard_kanban' %}" style="color: #38bdf8; text-decoration: none; font-weight: 600;">
+                                                {{ m.lead.name }} (#{{ m.lead.id }})
+                                            </a>
+                                        {% else %}
+                                            <span style="color: #64748b;">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if m.direction == 'in' %}
+                                            <button onclick="openReplyModal('{{ m.sender_igsid }}', '{% if m.lead %}{{ m.lead.id }}{% endif %}')" class="btn" style="background: rgba(225,48,108,0.15); color: #f472b6; border: 1px solid rgba(225,48,108,0.3); padding: 4px 10px; border-radius: 6px; font-size: 11px; cursor: pointer;">
+                                                <i class="fa-solid fa-reply"></i> Ответить
+                                            </button>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 36px 20px; color: #64748b;">
+                    <i class="fa-brands fa-instagram" style="font-size: 42px; margin-bottom: 12px; opacity: 0.4;"></i>
+                    <p style="font-size: 14px; margin: 0;">Сообщений Instagram пока нет.</p>
+                    <p style="font-size: 12px; margin-top: 4px;">Вы можете отправить тестовое сообщение с помощью кнопки выше.</p>
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <!-- Ответить бериш Модали -->
+    <div id="replyModal" style="display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.5); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center;">
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; width: 440px; max-width: 90%; box-shadow: 0 20px 40px rgba(15,23,42,0.15); color: #0f172a;">
+            <div style="font-size: 16px; font-weight: 700; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
+                <span><i class="fa-brands fa-instagram" style="color: #e1306c;"></i> Ответить клиенту в Instagram Direct</span>
+                <button onclick="closeReplyModal()" style="background: none; border: none; color: #475569; font-size: 16px; cursor: pointer;">&times;</button>
+            </div>
+            <div style="background: rgba(234,179,8,0.1); border: 1px solid rgba(234,179,8,0.25); color: #fde047; padding: 10px; border-radius: 8px; font-size: 11px; margin-bottom: 12px;">
+                <i class="fa-solid fa-clock"></i> <b>Окно 24 часа:</b> Ответ можно отправить в течение 24 часов после последнего сообщения клиента (правило Meta).
+            </div>
+            <input type="hidden" id="reply_igsid">
+            <input type="hidden" id="reply_lead_id">
+            <div style="margin-bottom: 14px;">
+                <label class="form-label">Ответить матни</label>
+                <textarea id="reply_text" rows="4" class="form-input" placeholder="Напишите ответ клиенту..."></textarea>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button onclick="closeReplyModal()" class="btn" style="background: #f1f5f9; color: #1e293b; border: 1px solid #cbd5e1; border: none; padding: 8px 14px; border-radius: 8px; font-size: 13px; cursor: pointer;">Отмена</button>
+                <button onclick="submitInstagramReply()" class="btn-ig-gradient" style="padding: 8px 18px; font-size: 13px;">
+                    <i class="fa-solid fa-paper-plane"></i> Отправить
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         INSTAGRAM STATS EDIT MODAL (Postlar, Obunachilar, Obunalar)
+         ═══════════════════════════════════════════════════════════════ -->
+    <div id="igStatsEditModal" style="display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.5); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(6px);">
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; width: 440px; max-width: 92%; box-shadow: 0 20px 40px rgba(15,23,42,0.15); color: #0f172a;">
+            <div style="font-size: 16px; font-weight: 700; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; color: #0f172a;">
+                <span><i class="fa-brands fa-instagram" style="color: #e1306c;"></i> Редактирование профиля Instagram</span>
+                <button onclick="closeIgStatsEditModal()" style="background: none; border: none; color: #475569; font-size: 20px; cursor: pointer;">&times;</button>
+            </div>
+
+            <!-- 3 ta asosiy statistika: Postlar, Obunachilar, Obunalar -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 14px;">
+                <div>
+                    <label class="form-label" style="font-size: 11px;">Публикации</label>
+                    <input type="number" id="editMediaCount" class="form-input" value="{{ status_data.media_count|default:'0' }}" min="0" style="text-align: center; font-weight: 700;">
+                </div>
+                <div>
+                    <label class="form-label" style="font-size: 11px; color: #f43f5e;">Подписчики</label>
+                    <input type="number" id="editFollowersCount" class="form-input" value="{{ status_data.followers_count|default:'0' }}" min="0" style="text-align: center; font-weight: 700; border-color: rgba(244,63,94,0.4);">
+                </div>
+                <div>
+                    <label class="form-label" style="font-size: 11px;">Подписки</label>
+                    <input type="number" id="editFollowingCount" class="form-input" value="{{ status_data.following_count|default:'0' }}" min="0" style="text-align: center; font-weight: 700;">
+                </div>
+            </div>
+
+            <div style="margin-bottom: 12px;">
+                <label class="form-label" style="font-size: 11.5px;">Полное имя (Название / Заголовок)</label>
+                <input type="text" id="editFullName" class="form-input" value="{{ status_data.full_name|default:status_data.ig_username }}" placeholder="Masalan: Apex Study Center">
+            </div>
+
+            <div style="margin-bottom: 12px;">
+                <label class="form-label" style="font-size: 11.5px;">Ссылка на аватар (URL)</label>
+                <input type="url" id="editProfilePicUrl" class="form-input" value="{{ status_data.profile_pic_url|default:'' }}" placeholder="https://... rasm havolasi">
+            </div>
+
+            <div style="margin-bottom: 18px;">
+                <label class="form-label" style="font-size: 11.5px;">О себе / Биография (Bio)</label>
+                <textarea id="editBio" rows="2" class="form-input" placeholder="Описание профиля...">{{ status_data.bio|default:'' }}</textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" onclick="closeIgStatsEditModal()" class="btn" style="background: #f1f5f9; color: #1e293b; border: 1px solid #cbd5e1; border: none; padding: 9px 16px; border-radius: 8px; font-size: 13px; cursor: pointer;">
+                    Отмена
+                </button>
+                <button type="button" onclick="submitIgStatsEdit()" class="btn-ig-gradient" style="padding: 9px 20px; font-size: 13px; cursor: pointer;">
+                    <i class="fa-solid fa-check"></i> Сохранить
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         INSTAGRAM CREDENTIALS LOGIN MODAL (Username + Пароль)
+         ═══════════════════════════════════════════════════════════════ -->
+    <div id="igLoginModal" style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0,0,0,0.82);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        animation: fadeInBg 0.25s ease;
+    ">
+        <div style="
+            background: #fff;
+            border-radius: 16px;
+            width: 360px;
+            max-width: 92vw;
+            box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+            overflow: hidden;
+            animation: slideUpModal 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        ">
+            <!-- Yuqori: orqaga tugmasi va sarlavha -->
+            <div style="
+                padding: 20px 20px 0 20px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            ">
+                <button onclick="handleIgModalBack()" style="
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                    padding: 4px;
+                    border-radius: 6px;
+                    color: #000;
+                    font-size: 18px;
+                    line-height: 1;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: opacity 0.2s;
+                " onmouseover="this.style.opacity='0.6'" onmouseout="this.style.opacity='1'" title="Orqaga">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 12H5M12 5l-7 7 7 7"/>
+                    </svg>
+                </button>
+                <span id="igModalTitle" style="font-size: 17px; font-weight: 700; color: #000; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                    Вход в аккаунт Instagram
+                </span>
+            </div>
+
+            <!-- Forma -->
+            <div style="padding: 22px 24px 28px 24px;">
+
+                <!-- 1-BOSQICH: Username + Пароль -->
+                <div id="igCredentialsStep">
+                    <!-- Username maydoni -->
+                    <div style="margin-bottom: 10px;">
+                        <input
+                            type="text"
+                            id="igLoginUsername"
+                            placeholder="Имя пользователя, телефон или эл. почта"
+                            autocomplete="username"
+                            style="
+                                width: 100%;
+                                box-sizing: border-box;
+                                background: #fafafa;
+                                border: 1px solid #dbdbdb;
+                                border-radius: 6px;
+                                padding: 14px 12px;
+                                font-size: 13px;
+                                color: #262626;
+                                outline: none;
+                                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                                transition: border-color 0.2s;
+                            "
+                            onfocus="this.style.borderColor='#a8a8a8'"
+                            onblur="this.style.borderColor='#dbdbdb'"
+                            onkeydown="if(event.key==='Enter') document.getElementById('igLoginPassword').focus()"
+                        >
+                    </div>
+
+                    <!-- Пароль maydoni -->
+                    <div style="margin-bottom: 16px; position: relative;">
+                        <input
+                            type="password"
+                            id="igLoginPassword"
+                            placeholder="Пароль"
+                            autocomplete="current-password"
+                            style="
+                                width: 100%;
+                                box-sizing: border-box;
+                                background: #fafafa;
+                                border: 1px solid #dbdbdb;
+                                border-radius: 6px;
+                                padding: 14px 44px 14px 12px;
+                                font-size: 13px;
+                                color: #262626;
+                                outline: none;
+                                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                                transition: border-color 0.2s;
+                            "
+                            onfocus="this.style.borderColor='#a8a8a8'"
+                            onblur="this.style.borderColor='#dbdbdb'"
+                            onkeydown="if(event.key==='Enter') submitIgLogin()"
+                        >
+                        <!-- Показать/yashirish tugmasi -->
+                        <button onclick="toggleIgPassword()" style="
+                            position: absolute;
+                            right: 12px;
+                            top: 50%;
+                            transform: translateY(-50%);
+                            background: none;
+                            border: none;
+                            cursor: pointer;
+                            padding: 0;
+                            font-size: 13px;
+                            font-weight: 700;
+                            color: #262626;
+                            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                        " id="igPasswordToggle">Показать</button>
+                    </div>
+
+                    <!-- Войти tugmasi -->
+                    <button
+                        id="igLoginBtn"
+                        onclick="submitIgLogin()"
+                        style="
+                            width: 100%;
+                            background: #0095f6;
+                            color: #fff;
+                            border: none;
+                            border-radius: 8px;
+                            padding: 12px;
+                            font-size: 14px;
+                            font-weight: 700;
+                            cursor: pointer;
+                            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                            transition: opacity 0.2s;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 8px;
+                        "
+                        onmouseover="this.style.opacity='0.85'"
+                        onmouseout="this.style.opacity='1'"
+                    >
+                        <span id="igLoginBtnText">Войти</span>
+                        <span id="igLoginSpinner" style="display:none; width:14px; height:14px; border:2px solid rgba(255,255,255,0.4); border-top-color:#fff; border-radius:50%; animation:spin 0.7s linear infinite;"></span>
+                    </button>
+
+                    <!-- Парольni unutdingizmi -->
+                    <div style="text-align: center; margin-top: 14px;">
+                        <a href="https://www.instagram.com/accounts/password/reset/" target="_blank" style="
+                            font-size: 12px;
+                            color: #00376b;
+                            font-weight: 700;
+                            text-decoration: none;
+                            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                        ">Парольni unutdingizmi?</a>
+                    </div>
+
+                    <!-- Ajratuvchi -->
+                    <div style="
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                        margin: 20px 0 16px;
+                    ">
+                        <div style="flex:1; height:1px; background:#dbdbdb;"></div>
+                        <span style="font-size: 13px; font-weight: 700; color: #737373; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">или</span>
+                        <div style="flex:1; height:1px; background:#dbdbdb;"></div>
+                    </div>
+
+                    <!-- Войти через Facebook -->
+                    <button onclick="window.location.href='{% if oauth_url %}{{ oauth_url }}{% else %}#{% endif %}'" style="
+                        width: 100%;
+                        background: none;
+                        border: 1px solid #dbdbdb;
+                        border-radius: 8px;
+                        padding: 11px;
+                        font-size: 13px;
+                        color: #385185;
+                        font-weight: 700;
+                        cursor: pointer;
+                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 8px;
+                        transition: background 0.2s;
+                    " onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='none'">
+                        <i class="fa-brands fa-facebook" style="font-size:16px;"></i>
+                        Войти через Facebook
+                    </button>
+                </div>
+
+                <!-- 2-BOSQICH: Ikki bosqichli tasdiqlash (2FA) -->
+                <div id="ig2faStep" style="display: none;">
+                    <div style="text-align: center; margin-bottom: 18px;">
+                        <div style="
+                            width: 58px;
+                            height: 58px;
+                            margin: 0 auto 12px;
+                            border-radius: 50%;
+                            background: rgba(37, 211, 102, 0.12);
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            color: #25D366;
+                            font-size: 28px;
+                        ">
+                            <i class="fa-brands fa-whatsapp"></i>
+                        </div>
+                        <div style="font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 6px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                            Код подтверждения (2FA)
+                        </div>
+                        <p style="font-size: 12px; color: #6b7280; line-height: 1.5; margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                            WhatsApp или SMS orqali kelgan <b>6 xonali tasdiqlash kodini</b> kiriting:
+                        </p>
+                    </div>
+
+                    <!-- Kod kiritish maydoni -->
+                    <div style="margin-bottom: 16px;">
+                        <input
+                            type="text"
+                            id="igTwoFactorCode"
+                            placeholder="123456"
+                            maxlength="8"
+                            inputmode="numeric"
+                            autocomplete="one-time-code"
+                            style="
+                                width: 100%;
+                                box-sizing: border-box;
+                                background: #fafafa;
+                                border: 2px solid #0095f6;
+                                border-radius: 8px;
+                                padding: 14px 12px;
+                                font-size: 22px;
+                                font-weight: 700;
+                                letter-spacing: 6px;
+                                text-align: center;
+                                color: #262626;
+                                outline: none;
+                                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', monospace;
+                                box-shadow: 0 0 0 3px rgba(0, 149, 246, 0.12);
+                            "
+                            onkeydown="if(event.key==='Enter') submitIgTwoFactor()"
+                        >
+                    </div>
+
+                    <!-- 2FA Tasdiqlash tugmasi -->
+                    <button
+                        id="ig2faBtn"
+                        onclick="submitIgTwoFactor()"
+                        style="
+                            width: 100%;
+                            background: #0095f6;
+                            color: #fff;
+                            border: none;
+                            border-radius: 8px;
+                            padding: 12px;
+                            font-size: 14px;
+                            font-weight: 700;
+                            cursor: pointer;
+                            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                            transition: opacity 0.2s;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 8px;
+                        "
+                        onmouseover="this.style.opacity='0.85'"
+                        onmouseout="this.style.opacity='1'"
+                    >
+                        <span id="ig2faBtnText">Подтвердить и войти</span>
+                        <span id="ig2faSpinner" style="display:none; width:14px; height:14px; border:2px solid rgba(255,255,255,0.4); border-top-color:#fff; border-radius:50%; animation:spin 0.7s linear infinite;"></span>
+                    </button>
+
+                    <!-- Orqaga qaytish -->
+                    <div style="text-align: center; margin-top: 14px;">
+                        <button type="button" onclick="backToCredentialsStep()" style="
+                            background: none;
+                            border: none;
+                            cursor: pointer;
+                            font-size: 13px;
+                            color: #737373;
+                            font-weight: 600;
+                            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                        ">
+                            &larr; Назад (другой аккаунт)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Xato xabari -->
+                <div id="igLoginError" style="
+                    display: none;
+                    margin-top: 14px;
+                    background: #fff3f3;
+                    border: 1px solid #ffd0d0;
+                    border-radius: 8px;
+                    padding: 12px;
+                    font-size: 13px;
+                    color: #e01e37;
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                    line-height: 1.4;
+                "></div>
+
+                <!-- Muvaffaqiyat xabari -->
+                <div id="igLoginSuccess" style="
+                    display: none;
+                    margin-top: 14px;
+                    background: #f0fff4;
+                    border: 1px solid #a8e6c0;
+                    border-radius: 8px;
+                    padding: 12px;
+                    font-size: 13px;
+                    color: #1a7a3a;
+                    font-weight: 700;
+                    text-align: center;
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                "></div>
+
+                <!-- Meta belgisi -->
+                <div style="text-align:center; margin-top:20px;">
+                    <svg aria-label="Meta" height="14" viewBox="0 0 181.5 38" fill="#737373" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8.75 0C3.92 0 0 3.92 0 8.75v20.5C0 34.08 3.92 38 8.75 38h20.5C34.08 38 38 34.08 38 29.25V8.75C38 3.92 34.08 0 29.25 0H8.75zm87.7 6.5c-4.3 0-7.6 1.4-10 4.2-2.3 2.7-3.5 6.5-3.5 11.3s1.2 8.6 3.5 11.3c2.4 2.7 5.7 4.1 10 4.1s7.7-1.4 10-4.1c2.3-2.7 3.5-6.5 3.5-11.3s-1.2-8.6-3.5-11.3c-2.3-2.8-5.7-4.2-10-4.2zm46.3.4v24.3l-15.3-24.3h-6.6V37h6.3V12.7L142.5 37h6.6V6.9h-6.4zm27.2 0l-11 30.1h6.8l2.4-6.8h11.7l2.4 6.8h6.9L178 6.9h-8zm3.9 7.5l4.3 11.3h-8.6l4.3-11.3zm-77.4-7.5v30.1h22.6v-5.8h-16.2V6.9h-6.4zm-31.2 0v30.1h6.4V6.9h-6.4z"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CSS animatsiyalari -->
+    <style>
+        @keyframes fadeInBg {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUpModal {
+            from { opacity: 0; transform: translateY(30px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        #igLoginModal.active { display: flex !important; }
+    </style>
+
+    <script>
+        function copyText(elementId) {
+            const el = document.getElementById(elementId);
+            const text = el.innerText || el.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                alert("Нусха олинди: " + text);
+            }).catch(() => {
+                alert("Нусха олишда хатолик");
+            });
+        }
+
+        function disconnectInstagram() {
+            if (!confirm("Instagram аккаунтини тизимдан узмоқчимисиз? Токен ўчирилади.")) return;
+
+            fetch("{% url 'api_instagram_disconnect' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": getCookie("csrftoken"),
+                    "Content-Type": "application/json",
+                }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.ok) {
+                    location.reload();
+                } else {
+                    alert("Хатолик: " + data.error);
+                }
+            });
+        }
+
+        function syncInstagramMessages() {
+            const btnText = document.getElementById('syncBtnText');
+            const btnText2 = document.getElementById('syncBtnText2');
+            const syncIcon = document.getElementById('syncIconBtn');
+            if (btnText) btnText.textContent = 'Tekshirilmoqda...';
+            if (btnText2) btnText2.textContent = 'Tekshirilmoqda...';
+            if (syncIcon) syncIcon.className = 'fa-solid fa-rotate fa-spin';
+
+            fetch("{% url 'api_instagram_sync' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": getCookie("csrftoken"),
+                    "Content-Type": "application/json",
+                }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (btnText) btnText.textContent = 'Проверить сообщения (Kanban)';
+                if (btnText2) btnText2.textContent = 'Проверить сообщения';
+                if (syncIcon) syncIcon.className = 'fa-solid fa-rotate';
+
+                if (data.ok) {
+                    const res = data.result || {};
+                    const newMsg = res.new_messages || 0;
+                    const newLeads = res.new_leads || 0;
+                    const mode = data.mode || '';
+                    const sub = data.subscription || {};
+
+                    let modeText = mode === 'conversations_api' ? '📡 Meta Conversations API' : '🔄 instagrapi polling';
+                    let subText = '';
+                    if (sub.subscribed !== undefined) {
+                        subText = sub.subscribed ? '\n✅ Webhook subscription: FAOL' : '\n⚠️ Webhook subscription: YO\'Q (pastdagi tugma bilan yoqing)';
+                    }
+                    if (sub.resubscribed) subText += '\n🔌 Yangi subscription yaratildi!';
+
+                    const convCount = res.conversations_checked !== undefined ? `\nKo'rilgan suhbatlar: ${res.conversations_checked}` : '';
+                    const cRes = res.comments || {};
+                    const newComments = cRes.new_comments || 0;
+                    const commentText = newComments > 0 ? `\n📸 Yangi post/reels komentariyalari: ${newComments} ta` : '';
+
+                    if (newMsg > 0 || newLeads > 0 || newComments > 0) {
+                        alert(`✅ Instagram tekshirildi! (${modeText})\nYangi DM xabarlar: ${newMsg} ta${commentText}\nKanban doskasiga qo'shildi: ${newLeads + (cRes.new_leads || 0)} ta lid${convCount}${subText}`);
+                        location.reload();
+                    } else {
+                        const errText = res.error ? `\n⚠️ ${res.error}` : '';
+                        alert(`ℹ️ Tekshirildi (${modeText})\nYangi DM или komentariya yo'q.${convCount}${subText}${errText}`);
+                    }
+                } else {
+                    alert("Xatolik: " + (data.error || "Noma'lum"));
+                }
+            })
+            .catch(err => {
+                if (btnText) btnText.textContent = 'Проверить сообщения (Kanban)';
+                if (btnText2) btnText2.textContent = 'Проверить сообщения';
+                if (syncIcon) syncIcon.className = 'fa-solid fa-rotate';
+                alert("Tarmoq xatosi: " + err);
+            });
+        }
+
+        function activateWebhookSubscription() {
+            const btn = document.getElementById('subscribeWebhookBtn');
+            if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Ulanmoqda...';
+            const statusDiv = document.getElementById('subscriptionStatusDiv');
+
+            const fd = new FormData();
+            fd.append('action', 'subscribe');
+
+            fetch('/api/instagram/subscribe/', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken') },
+                body: fd
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (btn) btn.innerHTML = '<i class="fa-solid fa-plug"></i> Webhook\'ni yoqish (subscribe)';
+                if (data.ok) {
+                    if (statusDiv) statusDiv.innerHTML = '<span style="color:#34d399;">✅ Webhook subscription FAOL!</span>';
+                    alert('✅ Instagram webhook messages subscription muvaffaqiyatli yoqildi!\n\nEndi Meta Developer Console\'da:\n1. Webhook URL ni kiriting\n2. Verify Token ni kiriting\n3. "messages" ga subscribe qiling\n4. App\'ni LIVE rejimga o\'tkazing');
+                } else {
+                    const err = data.result ? JSON.stringify(data.result.error || data.result) : (data.error || 'Xatolik');
+                    if (statusDiv) statusDiv.innerHTML = `<span style="color:#f87171;">❌ ${err}</span>`;
+                    alert('Xatolik: ' + err + '\n\nMeta Developer Console\'da qo\'lda "messages" ga subscribe qilishingiz kerak!');
+                }
+            })
+            .catch(err => {
+                if (btn) btn.innerHTML = '<i class="fa-solid fa-plug"></i> Webhook\'ni yoqish (subscribe)';
+                alert('Tarmoq xatosi: ' + err);
+            });
+        }
+
+        function checkWebhookSubscription() {
+            const statusDiv = document.getElementById('subscriptionStatusDiv');
+            if (statusDiv) statusDiv.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Tekshirilmoqda...';
+
+            const fd = new FormData();
+            fd.append('action', 'check');
+
+            fetch('/api/instagram/subscribe/', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken') },
+                body: fd
+            })
+            .then(r => r.json())
+            .then(data => {
+                const sub = data.subscription || {};
+                const isSubbed = sub.subscribed;
+                const fields = (sub.fields || []).join(', ') || 'Yo\'q';
+                if (statusDiv) {
+                    statusDiv.innerHTML = isSubbed
+                        ? `<span style="color:#34d399;">✅ FAOL<br>Fields: ${fields}</span>`
+                        : `<span style="color:#fbbf24;">⚠️ Obuna YO'Q<br>Pastdagi tugma bilan yoqing</span>`;
+                }
+            })
+            .catch(err => {
+                if (statusDiv) statusDiv.innerHTML = '<span style="color:#f87171;">Xatolik</span>';
+            });
+        }
+
+
+        function simulateInstagramMessage() {
+            const igsid = document.getElementById("sim_igsid").value.trim();
+            const text = document.getElementById("sim_text").value.trim();
+            const resBox = document.getElementById("sim_result");
+
+            if (!text) {
+                alert("Текст тестового сообщенияни киритинг");
+                return;
+            }
+
+            const fd = new FormData();
+            fd.append("igsid", igsid);
+            fd.append("text", text);
+
+            fetch("{% url 'api_instagram_simulate' %}", {
+                method: "POST",
+                headers: { "X-CSRFToken": getCookie("csrftoken") },
+                body: fd
+            })
+            .then(r => r.json())
+            .then(data => {
+                resBox.style.display = "block";
+                if (data.ok) {
+                    resBox.style.color = "#34d399";
+                    resBox.innerHTML = `✅ Тест хабари қабул қилинди! Лид Kanban'да яратилди. <a href="{% url 'dashboard_kanban' %}" style="color:#38bdf8; text-decoration:underline;">Kanban'га ўтиш &rarr;</a>`;
+                    setTimeout(() => location.reload(), 1800);
+                } else {
+                    resBox.style.color = "#f87171";
+                    resBox.innerHTML = `❌ Хатолик: ` + (data.error || "Номаълум");
+                }
+            });
+        }
+
+        function openReplyModal(igsid, leadId) {
+            document.getElementById("reply_igsid").value = igsid || "";
+            document.getElementById("reply_lead_id").value = leadId || "";
+            document.getElementById("reply_text").value = "";
+            document.getElementById("replyModal").style.display = "flex";
+        }
+
+        function closeReplyModal() {
+            document.getElementById("replyModal").style.display = "none";
+        }
+
+        function submitInstagramReply() {
+            const igsid = document.getElementById("reply_igsid").value;
+            const leadId = document.getElementById("reply_lead_id").value;
+            const text = document.getElementById("reply_text").value.trim();
+
+            if (!text) {
+                alert("Текст тестового сообщенияни ёзинг");
+                return;
+            }
+
+            const fd = new FormData();
+            fd.append("igsid", igsid);
+            fd.append("lead_id", leadId);
+            fd.append("message", text);
+
+            fetch("{% url 'api_instagram_reply' %}", {
+                method: "POST",
+                headers: { "X-CSRFToken": getCookie("csrftoken") },
+                body: fd
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.ok) {
+                    alert("Хабар муваффақиятли юборилди! ✅");
+                    closeReplyModal();
+                    location.reload();
+                } else {
+                    alert("Хатолик: " + data.error);
+                }
+            })
+            .catch(err => {
+                alert("Тармоқ хатолиги: " + err);
+            });
+        }
+
+        /* ── Profile Stats Modal ────────────────────────────────────── */
+        function openIgStatsEditModal() {
+            document.getElementById('igStatsEditModal').style.display = 'flex';
+        }
+
+        function closeIgStatsEditModal() {
+            document.getElementById('igStatsEditModal').style.display = 'none';
+        }
+
+        function submitIgStatsEdit() {
+            const posts = document.getElementById('editMediaCount').value.trim();
+            const followers = document.getElementById('editFollowersCount').value.trim();
+            const following = document.getElementById('editFollowingCount').value.trim();
+            const fullName = document.getElementById('editFullName').value.trim();
+            const picUrl = document.getElementById('editProfilePicUrl').value.trim();
+            const bio = document.getElementById('editBio').value.trim();
+
+            const fd = new FormData();
+            fd.append('media_count', posts);
+            fd.append('followers_count', followers);
+            fd.append('following_count', following);
+            fd.append('full_name', fullName);
+            fd.append('profile_pic_url', picUrl);
+            fd.append('bio', bio);
+
+            fetch("{% url 'api_instagram_update_stats' %}", {
+                method: "POST",
+                headers: { "X-CSRFToken": getCookie("csrftoken") },
+                body: fd
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.ok) {
+                    const st = data.stats;
+                    const elPosts = document.getElementById('igCardPosts');
+                    if (elPosts) elPosts.textContent = st.media_count;
+                    const elFollowers = document.getElementById('igCardFollowers');
+                    if (elFollowers) elFollowers.textContent = st.followers_count;
+                    const elFollowing = document.getElementById('igCardFollowing');
+                    if (elFollowing) elFollowing.textContent = st.following_count;
+                    const elFullName = document.getElementById('igCardFullName');
+                    if (elFullName) elFullName.textContent = st.full_name || st.username;
+                    const elBio = document.getElementById('igCardBio');
+                    if (elBio && st.bio) elBio.textContent = st.bio;
+
+                    if (st.profile_pic_url) {
+                        const avatarImg = document.getElementById('igProfileAvatarImg');
+                        const fallback = document.getElementById('igProfileAvatarFallback');
+                        if (avatarImg) {
+                            avatarImg.src = st.profile_pic_url;
+                            avatarImg.style.display = 'block';
+                        }
+                        if (fallback) fallback.style.display = 'none';
+                    }
+
+                    closeIgStatsEditModal();
+                } else {
+                    alert("Хатолик: " + data.error);
+                }
+            })
+            .catch(err => alert("Тармоқ хатолиги: " + err));
+        }
+
+        /* ── Instagram Login Modal & 2FA ───────────────────────────── */
+        let igPending2Fa = {
+            username: '',
+            password: '',
+            two_factor_identifier: '',
+            cl_settings: '{}'
+        };
+
+        function openIgLoginModal() {
+            const modal = document.getElementById('igLoginModal');
+            modal.style.display = 'flex';
+            backToCredentialsStep();
+            document.getElementById('igLoginError').style.display = 'none';
+            document.getElementById('igLoginSuccess').style.display = 'none';
+            document.getElementById('igLoginUsername').value = '';
+            document.getElementById('igLoginPassword').value = '';
+            document.getElementById('igTwoFactorCode').value = '';
+            setTimeout(() => document.getElementById('igLoginUsername').focus(), 120);
+        }
+
+        function closeIgLoginModal() {
+            document.getElementById('igLoginModal').style.display = 'none';
+            backToCredentialsStep();
+        }
+
+        function handleIgModalBack() {
+            const is2fa = document.getElementById('ig2faStep').style.display !== 'none';
+            if (is2fa) {
+                backToCredentialsStep();
+            } else {
+                closeIgLoginModal();
+            }
+        }
+
+        function backToCredentialsStep() {
+            document.getElementById('ig2faStep').style.display = 'none';
+            document.getElementById('igCredentialsStep').style.display = 'block';
+            document.getElementById('igModalTitle').textContent = "Вход в аккаунт Instagram";
+            document.getElementById('igLoginError').style.display = 'none';
+            setTimeout(() => document.getElementById('igLoginPassword').focus(), 100);
+        }
+
+        // Modal tashqarisiga bosish — yopish
+        document.getElementById('igLoginModal').addEventListener('click', function(e) {
+            if (e.target === this) closeIgLoginModal();
+        });
+
+        function toggleIgPassword() {
+            const inp = document.getElementById('igLoginPassword');
+            const btn = document.getElementById('igPasswordToggle');
+            if (inp.type === 'password') {
+                inp.type = 'text';
+                btn.textContent = 'Yashirish';
+            } else {
+                inp.type = 'password';
+                btn.textContent = "Показать";
+            }
+        }
+
+        function submitIgLogin() {
+            const username = document.getElementById('igLoginUsername').value.trim();
+            const password = document.getElementById('igLoginPassword').value.trim();
+            const errBox = document.getElementById('igLoginError');
+            const sucBox = document.getElementById('igLoginSuccess');
+            const btn = document.getElementById('igLoginBtn');
+            const btnText = document.getElementById('igLoginBtnText');
+            const spinner = document.getElementById('igLoginSpinner');
+
+            errBox.style.display = 'none';
+            sucBox.style.display = 'none';
+
+            if (!username) {
+                showIgError("Username или email kiriting");
+                document.getElementById('igLoginUsername').focus();
+                return;
+            }
+            if (!password) {
+                showIgError("Пароль kiriting");
+                document.getElementById('igLoginPassword').focus();
+                return;
+            }
+
+            // Loading holati
+            btn.disabled = true;
+            btn.style.opacity = '0.75';
+            btnText.textContent = 'Kirilmoqda...';
+            spinner.style.display = 'inline-block';
+
+            const fd = new FormData();
+            fd.append('ig_username', username);
+            fd.append('ig_password', password);
+
+            fetch("{% url 'api_instagram_login' %}", {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken') },
+                body: fd,
+            })
+            .then(r => r.json())
+            .then(data => {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btnText.textContent = 'Войти';
+                spinner.style.display = 'none';
+
+                if (data.ok) {
+                    sucBox.innerHTML = `✅ @${data.ig_username} — muvaffaqiyatli ulandi!<br><small style="font-weight:400; opacity:0.8;">Sahifa yangilanmoqda...</small>`;
+                    sucBox.style.display = 'block';
+                    setTimeout(() => {
+                        closeIgLoginModal();
+                        location.reload();
+                    }, 1800);
+                } else {
+                    if (data.two_factor_required) {
+                        // 2FA talab qilinmoqda — 2-bosqichga o'tamiz
+                        igPending2Fa = {
+                            username: data.username || username,
+                            password: password,
+                            two_factor_identifier: data.two_factor_identifier || '',
+                            cl_settings: data.cl_settings || '{}'
+                        };
+                        document.getElementById('igCredentialsStep').style.display = 'none';
+                        document.getElementById('ig2faStep').style.display = 'block';
+                        document.getElementById('igModalTitle').textContent = '2FA Tasdiqlash';
+                        document.getElementById('igTwoFactorCode').value = '';
+                        setTimeout(() => document.getElementById('igTwoFactorCode').focus(), 150);
+                        return;
+                    }
+
+                    let msg = data.error || "Noma'lum xatolik";
+                    if (data.challenge_required) {
+                        msg += '<br><br><small>📱 Instagram ilovasini oching va xavfsizlik so\'rovini tasdiqlang, so\'ng qayta urinib ko\'ring.</small>';
+                    }
+                    showIgError(msg);
+                }
+            })
+            .catch(err => {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btnText.textContent = 'Войти';
+                spinner.style.display = 'none';
+                showIgError("Tarmoq xatosi: " + err);
+            });
+        }
+
+        function submitIgTwoFactor() {
+            const code = document.getElementById('igTwoFactorCode').value.trim();
+            const btn = document.getElementById('ig2faBtn');
+            const btnText = document.getElementById('ig2faBtnText');
+            const spinner = document.getElementById('ig2faSpinner');
+            const errBox = document.getElementById('igLoginError');
+            const sucBox = document.getElementById('igLoginSuccess');
+
+            errBox.style.display = 'none';
+            sucBox.style.display = 'none';
+
+            if (!code) {
+                showIgError("Iltimos, WhatsApp или SMS ga kelgan kodni kiriting");
+                document.getElementById('igTwoFactorCode').focus();
+                return;
+            }
+
+            btn.disabled = true;
+            btn.style.opacity = '0.75';
+            btnText.textContent = 'Tekshirilmoqda...';
+            spinner.style.display = 'inline-block';
+
+            const fd = new FormData();
+            fd.append('ig_username', igPending2Fa.username);
+            fd.append('ig_password', igPending2Fa.password);
+            fd.append('ig_code', code);
+            fd.append('two_factor_identifier', igPending2Fa.two_factor_identifier);
+            fd.append('cl_settings', igPending2Fa.cl_settings);
+
+            fetch("{% url 'api_instagram_verify_2fa' %}", {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken') },
+                body: fd,
+            })
+            .then(r => r.json())
+            .then(data => {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btnText.textContent = 'Подтвердить и войти';
+                spinner.style.display = 'none';
+
+                if (data.ok) {
+                    sucBox.innerHTML = `✅ @${data.ig_username} — muvaffaqiyatli ulandi!<br><small style="font-weight:400; opacity:0.8;">Sahifa yangilanmoqda...</small>`;
+                    sucBox.style.display = 'block';
+                    setTimeout(() => {
+                        closeIgLoginModal();
+                        location.reload();
+                    }, 1800);
+                } else {
+                    let msg = data.error || "Kod noto'g'ri или eskirgan";
+                    if (data.challenge_required) {
+                        msg += '<br><br><small>📱 Instagram ilovasidan xavfsizlik so\'rovini tasdiqlang.</small>';
+                    }
+                    showIgError(msg);
+                }
+            })
+            .catch(err => {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btnText.textContent = 'Подтвердить и войти';
+                spinner.style.display = 'none';
+                showIgError("Tarmoq xatosi: " + err);
+            });
+        }
+
+        function showIgError(msg) {
+            const errBox = document.getElementById('igLoginError');
+            errBox.innerHTML = msg;
+            errBox.style.display = 'block';
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+</html>

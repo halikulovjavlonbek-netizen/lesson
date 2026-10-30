@@ -1,0 +1,13 @@
+﻿db.sqlite3
+__pycache__/
+*.pyc
+.env
+venv/
+scratch/
+temp_instagram_backup.py
+node_modules/
+wa-platform/.wwebjs_auth/
+wa-platform/.wwebjs_cache/
+.wwebjs_auth/
+.wwebjs_cache/
+node_modules/

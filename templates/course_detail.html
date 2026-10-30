@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ course.title }} | Учебный центр Казахстан{% endblock %}
+
+{% block content %}
+<section class="section" style="padding-top: 50px;">
+    <div class="container">
+        <a href="{% url 'home' %}" class="btn btn-outline" style="margin-bottom: 24px;">
+            <i class="fa-solid fa-arrow-left"></i> Назад ко всем курсам
+        </a>
+
+        <div class="enroll-box">
+            <div class="enroll-left">
+                <span class="enroll-tag">{{ course.get_category_display }}</span>
+                <h1>{{ course.title }}</h1>
+                <p style="font-size: 16px; margin: 16px 0;">{{ course.full_description }}</p>
+
+                <div class="course-details" style="border: none; padding: 0; margin-bottom: 24px;">
+                    <div class="course-detail-row">
+                        <span>Длительность:</span>
+                        <strong>{{ course.duration }}</strong>
+                    </div>
+                    <div class="course-detail-row">
+                        <span>Стоимость:</span>
+                        <strong style="color: var(--accent); font-size: 22px;">{{ course.price_kzt|floatformat:0 }} ₸ / мес</strong>
+                    </div>
+                </div>
+
+                <a href="https://wa.me/{{ whatsapp_clean }}?text=Здравствуйте!%20Хочу%20узнать%20подробнее%20о%20курсе%20{{ course.title|urlencode }}" target="_blank" class="btn btn-whatsapp-lg">
+                    <i class="fa-brands fa-whatsapp"></i> Спросить в WhatsApp (+7 708 116 02 65)
+                </a>
+            </div>
+
+            <div class="enroll-right">
+                <div class="quick-form-card" style="padding: 24px;">
+                    <h3>Записаться на этот курс</h3>
+                    <p style="margin-bottom: 16px; font-size: 13px; color: var(--text-muted);">
+                        Оставьте контакты для бронирования места в группе
+                    </p>
+                    <form action="{% url 'submit_lead' %}" method="POST" class="lead-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="course" value="{{ course.id }}">
+                        <div class="form-group">
+                            <label>Ваше имя</label>
+                            {{ form.name }}
+                        </div>
+                        <div class="form-group">
+                            <label>Номер телефона (+7)</label>
+                            {{ form.phone }}
+                        </div>
+                        <div class="form-group">
+                            <label>Комментарий</label>
+                            {{ form.message }}
+                        </div>
+                        <button type="submit" class="btn btn-accent btn-block">
+                            Записаться за {{ course.price_kzt|floatformat:0 }} ₸
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

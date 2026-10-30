@@ -1,0 +1,332 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Учебный центр в Казахстане | Английский, IT, Математика{% endblock %}</title>
+    <meta name="description" content="Учебный центр нового поколения в Казахстане. Курсы английского языка, IT и программирования, математики. Запись на пробный урок: +7 708 116 02 65.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=20261031_white_clean">
+    <style>
+        /* Force clean white background and dark crisp text across public site */
+        body {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+        }
+        .site-header {
+            background: rgba(255, 255, 255, 0.96) !important;
+            border-bottom: 1px solid #e2e8f0 !important;
+        }
+        .side-menu-drawer {
+            background: #ffffff !important;
+            color: #0f172a !important;
+            border-right: 1px solid #e2e8f0 !important;
+        }
+        .side-menu-header {
+            border-bottom: 1px solid #e2e8f0 !important;
+        }
+        .side-nav-item {
+            color: #1e293b !important;
+        }
+        .side-nav-item:hover, .side-nav-item.active {
+            background: #f1f5f9 !important;
+            color: #2563eb !important;
+        }
+        .side-menu-admin-box {
+            background: #f8fafc !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+        .admin-box-title {
+            color: #0f172a !important;
+        }
+        .admin-box-desc {
+            color: #64748b !important;
+        }
+        .hero-section {
+            background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%) !important;
+            color: #0f172a !important;
+        }
+        .hero-title {
+            color: #0f172a !important;
+        }
+        .hero-subtitle {
+            color: #475569 !important;
+        }
+        .quick-form-card {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.08) !important;
+        }
+        .quick-form-header h3 {
+            color: #0f172a !important;
+        }
+        .quick-form-header p {
+            color: #64748b !important;
+        }
+        .lead-form input, .lead-form select, .lead-form textarea {
+            background: #f8fafc !important;
+            border: 1px solid #cbd5e1 !important;
+            color: #0f172a !important;
+        }
+        .lead-form input:focus, .lead-form select:focus, .lead-form textarea:focus {
+            background: #ffffff !important;
+            border-color: #2563eb !important;
+            color: #0f172a !important;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Шапка сайта (Меню чап томонда) -->
+    <header class="site-header">
+        <div class="container header-container">
+            <!-- Чап томонда: Меню тугмаси ва Логотип -->
+            <div class="header-left-box">
+                <button id="menuToggleBtn" class="menu-burger-btn" aria-label="Меню">
+                    <span class="burger-bar"></span>
+                    <span class="burger-bar"></span>
+                    <span class="burger-bar"></span>
+                    <span class="burger-text">Меню</span>
+                </button>
+                <a href="{% url 'home' %}" class="logo">
+                    <span class="logo-icon"><i class="fa-solid fa-graduation-cap"></i></span>
+                    <span class="logo-text">STUDY<b>CENTER</b> <span class="badge-kz">KZ</span></span>
+                </a>
+            </div>
+
+            <!-- Ўнг томонда: WhatsApp ва тезкор боғланиш -->
+            <div class="header-right-box">
+                <a href="https://wa.me/{{ whatsapp_clean }}" target="_blank" class="btn-whatsapp-header">
+                    <i class="fa-brands fa-whatsapp"></i> +7 708 116 02 65
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Выдвижное меню (Drawer Menu / Off-canvas) -->
+    <div id="sideMenuOverlay" class="side-menu-overlay"></div>
+    <aside id="sideMenuDrawer" class="side-menu-drawer">
+        <div class="side-menu-header">
+            <div class="logo">
+                <span class="logo-icon"><i class="fa-solid fa-graduation-cap"></i></span>
+                <span class="logo-text">STUDY<b>CENTER</b></span>
+            </div>
+            <button id="menuCloseBtn" class="menu-close-btn" aria-label="Закрыть">&times;</button>
+        </div>
+
+        <nav class="side-menu-nav">
+            <a href="{% url 'home' %}" class="side-nav-item active">
+                <i class="fa-solid fa-house"></i> Главная
+            </a>
+            <a href="/#courses" class="side-nav-item">
+                <i class="fa-solid fa-book-open"></i> Курсы и цены (₸)
+            </a>
+            <a href="/#why-us" class="side-nav-item">
+                <i class="fa-solid fa-award"></i> Преимущества
+            </a>
+            <a href="/#process" class="side-nav-item">
+                <i class="fa-solid fa-chalkboard-user"></i> Система обучения
+            </a>
+            <a href="/#enroll" class="side-nav-item">
+                <i class="fa-solid fa-file-signature"></i> Запись на урок
+            </a>
+            <a href="#" id="menuOpenWaQr" class="side-nav-item side-nav-wa">
+                <i class="fa-brands fa-whatsapp"></i> WhatsApp QR-код (+7 708 116 02 65)
+            </a>
+        </nav>
+
+        <!-- Блок Администратора (Бошқарув панели) -->
+        <div class="side-menu-admin-box">
+            <div class="admin-box-title">
+                <i class="fa-solid fa-user-shield"></i> Управление (Администратор)
+            </div>
+            <p class="admin-box-desc">Все поступившие заявки и настройки WhatsApp</p>
+            <a href="{% url 'admin_login' %}" class="btn btn-admin btn-block">
+                <i class="fa-solid fa-lock"></i> Вход в панель управления
+            </a>
+            <div class="admin-credentials-hint">
+                <span>Логин: <b>admin</b></span> | <span>Пароль: <b>admin123password</b></span>
+            </div>
+        </div>
+
+        <div class="side-menu-footer">
+            <p><i class="fa-solid fa-phone"></i> +7 708 116 02 65</p>
+            <p><i class="fa-solid fa-location-dot"></i> Казахстан, Алматы / Астана</p>
+        </div>
+    </aside>
+
+    <!-- Основной контент -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Плавающая кнопка быстрого перехода в WhatsApp / QR -->
+    <div class="floating-contact">
+        <button id="openWaModalBtn" class="float-btn float-whatsapp" title="WhatsApp QR-код">
+            <i class="fa-brands fa-whatsapp"></i>
+            <span class="float-tooltip">WhatsApp QR: +7 708 116 02 65</span>
+        </button>
+    </div>
+
+    <!-- Модальное окно: WhatsApp QR-код -->
+    <div id="waModal" class="wa-modal-overlay">
+        <div class="wa-modal-card">
+            <button class="wa-modal-close" id="closeWaModalBtn">&times;</button>
+            <div class="wa-modal-header">
+                <div class="wa-modal-icon"><i class="fa-brands fa-whatsapp"></i></div>
+                <h3>Свяжитесь с нами в WhatsApp</h3>
+                <p>Официальный номер учебного центра: <strong>+7 708 116 02 65</strong></p>
+            </div>
+            <div class="wa-qr-box">
+                <!-- Динамический QR-код WhatsApp -->
+                <img id="waQrImage" src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=https%3A%2F%2Fwa.me%2F77081160265%3Ftext%3D%D0%A1%D3%99%D0%BB%D0%B5%D0%BC%D0%B5%D1%82%D1%81%D1%96%D0%B7%20%D0%B1%D0%B5!%20%D0%9E%D2%9B%D1%83%20%D0%BE%D1%80%D1%82%D0%B0%D0%BB%D1%8B%D2%93%D1%8B%20%D0%B6%D3%99%D0%BD%D1%96%D0%BD%D0%B4%D0%B5%20%D0%B1%D1%96%D0%BB%D0%B3%D1%96%D0%BC%20%D0%BA%D0%B5%D0%BB%D0%B5%D0%B4%D1%96" alt="WhatsApp QR Code">
+                <div class="wa-qr-scan-line"></div>
+            </div>
+            <p class="wa-modal-hint">
+                <i class="fa-solid fa-camera"></i> Откройте камеру телефона или приложение WhatsApp и <strong>отсканируйте этот QR-код</strong>.
+            </p>
+            <div class="wa-modal-actions">
+                <a href="https://wa.me/77081160265?text=Здравствуйте!%20Хочу%20узнать%20подробнее%20о%20курсах" target="_blank" class="btn btn-whatsapp-lg btn-block">
+                    <i class="fa-brands fa-whatsapp"></i> Открыть напрямую в WhatsApp
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Футер -->
+    <footer class="site-footer" id="contacts">
+        <div class="container footer-grid">
+            <div class="footer-col">
+                <div class="logo footer-logo">
+                    <span class="logo-icon"><i class="fa-solid fa-graduation-cap"></i></span>
+                    <span class="logo-text">STUDY<b>CENTER</b> <span class="badge-kz">KZ</span></span>
+                </div>
+                <p class="footer-desc">
+                    Современный учебный центр в Казахстане. Практические навыки, опытные педагоги и гарантированный результат.
+                </p>
+                <div class="footer-socials">
+                    <a href="https://wa.me/{{ whatsapp_clean }}" target="_blank" class="social-icon wa"><i class="fa-brands fa-whatsapp"></i></a>
+                    <a href="https://t.me/" target="_blank" class="social-icon tg"><i class="fa-brands fa-telegram"></i></a>
+                    <a href="https://instagram.com/" target="_blank" class="social-icon inst"><i class="fa-brands fa-instagram"></i></a>
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <h4 class="footer-title">Направления</h4>
+                <ul class="footer-links">
+                    <li><a href="/#courses">Английский для детей и взрослых</a></li>
+                    <li><a href="/#courses">IT и Программирование (Python / Web)</a></li>
+                    <li><a href="/#courses">Математика и подготовка к ЕНТ/НИШ</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4 class="footer-title">Контакты</h4>
+                <div class="footer-contact-item">
+                    <i class="fa-solid fa-phone"></i>
+                    <span>+7 708 116 02 65</span>
+                </div>
+                <div class="footer-contact-item">
+                    <i class="fa-brands fa-whatsapp"></i>
+                    <span>WhatsApp: +7 708 116 02 65</span>
+                </div>
+                <div class="footer-contact-item">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <span>Казахстан, Алматы / Астана (и онлайн по всему РК)</span>
+                </div>
+                <div class="footer-contact-item">
+                    <i class="fa-solid fa-clock"></i>
+                    <span>Пн - Сб: 09:00 - 20:00 (UTC+5)</span>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container footer-bottom-inner">
+                <p>© 2026 Учебный центр Казахстан. Все права защищены. Интеграция с Битрикс24 CRM.</p>
+                <p>Все цены указаны в национальной валюте Республики Казахстан — тенге (₸).</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+    // WhatsApp QR Modal logic
+    const openBtn = document.getElementById('openWaModalBtn');
+    const closeBtn = document.getElementById('closeWaModalBtn');
+    const modal = document.getElementById('waModal');
+
+    function openWaModal() {
+        if (modal) modal.classList.add('active');
+    }
+
+    function closeWaModal() {
+        if (modal) modal.classList.remove('active');
+    }
+
+    if (openBtn) openBtn.addEventListener('click', openWaModal);
+    if (closeBtn) closeBtn.addEventListener('click', closeWaModal);
+
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) closeWaModal();
+    });
+
+    // ----------------------------------------------------
+    // Drawer Меню: битта босганда очилади, яна босганда ёпилади
+    // ----------------------------------------------------
+    const menuToggleBtn = document.getElementById('menuToggleBtn');
+    const menuCloseBtn = document.getElementById('menuCloseBtn');
+    const sideDrawer = document.getElementById('sideMenuDrawer');
+    const sideOverlay = document.getElementById('sideMenuOverlay');
+
+    function toggleMenu() {
+        const isOpen = sideDrawer.classList.contains('active');
+        if (isOpen) {
+            closeMenu();
+        } else {
+            openMenu();
+        }
+    }
+
+    function openMenu() {
+        sideDrawer.classList.add('active');
+        sideOverlay.classList.add('active');
+        menuToggleBtn.classList.add('active');
+        document.body.style.overflow = 'hidden'; // орқа фон қимирламасин
+    }
+
+    function closeMenu() {
+        sideDrawer.classList.remove('active');
+        sideOverlay.classList.remove('active');
+        menuToggleBtn.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    if (menuToggleBtn) menuToggleBtn.addEventListener('click', toggleMenu);
+    if (menuCloseBtn) menuCloseBtn.addEventListener('click', closeMenu);
+    if (sideOverlay) sideOverlay.addEventListener('click', closeMenu);
+
+    // Меню ичидаги ссылкаларни босганда меню ёпилсин
+    document.querySelectorAll('.side-nav-item').forEach(link => {
+        link.addEventListener('click', (e) => {
+            if (link.id === 'menuOpenWaQr') {
+                e.preventDefault();
+                closeMenu();
+                openWaModal();
+            } else {
+                closeMenu();
+            }
+        });
+    });
+    </script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

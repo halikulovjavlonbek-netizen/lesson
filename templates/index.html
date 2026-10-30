@@ -1,0 +1,352 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="hero-bg-glow"></div>
+    <div class="container hero-container">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <i class="fa-solid fa-sparkles"></i> Набор в новые группы на этот месяц в Казахстане
+            </div>
+            <h1 class="hero-title">
+                Инвестируйте в будущее: <span>качественное образование</span> для детей и взрослых
+            </h1>
+            <p class="hero-subtitle">
+                Практические курсы английского языка, IT и школьных дисциплин. Индивидуальный подход, группы до 8 человек и гарантия результата.
+            </p>
+            <div class="hero-cta-group">
+                <a href="#enroll" class="btn btn-primary btn-lg">
+                    <span>Записаться на пробный урок</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </a>
+                <a href="https://wa.me/{{ whatsapp_clean }}?text=Здравствуйте!%20Хочу%20получить%20консультацию%20по%20курсам" target="_blank" class="btn btn-whatsapp-lg">
+                    <i class="fa-brands fa-whatsapp"></i>
+                    <span>Написать в WhatsApp</span>
+                </a>
+            </div>
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <span class="stat-number">1 500+</span>
+                    <span class="stat-label">Выпускников в РК</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">98%</span>
+                    <span class="stat-label">Положительных отзывов</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">8 чел.</span>
+                    <span class="stat-label">Максимум в группе</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-card-box">
+            <div class="quick-form-card">
+                <div class="quick-form-header">
+                    <h3>Бесплатный пробный урок</h3>
+                    <p>Определим уровень знаний и подберем удобное расписание</p>
+                </div>
+                <form id="heroLeadForm" action="{% url 'submit_lead' %}" method="POST" class="lead-form">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="id_name">Ваше имя</label>
+                        {{ form.name }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_phone">Номер телефона (+7)</label>
+                        {{ form.phone }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_course">Интересующее направление</label>
+                        {{ form.course }}
+                    </div>
+                    <button type="submit" class="btn btn-accent btn-block" id="heroSubmitBtn">
+                        <i class="fa-solid fa-paper-plane"></i> Забронировать место
+                    </button>
+                    <p class="form-disclaimer">
+                        Нажимая кнопку, вы соглашаетесь на обработку данных. Менеджер ответит в WhatsApp за 5 минут.
+                    </p>
+                </form>
+                <div id="heroSuccessAlert" class="alert-success-box" style="display: none;">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <h4>Заявка успешно принята!</h4>
+                    <p>Мы передали ваш номер дежурному менеджеру. Скоро напишем вам в WhatsApp на указанный номер.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Courses Section -->
+<section class="section courses-section" id="courses">
+    <div class="container">
+        <div class="section-header text-center">
+            <span class="section-tag">Каталог программ</span>
+            <h2 class="section-title">Популярные направления обучения</h2>
+            <p class="section-subtitle">Все цены указаны в казахстанских тенге (₸) за 1 месяц обучения</p>
+        </div>
+
+        <div class="courses-grid">
+            {% for course in courses %}
+            <div class="course-card">
+                {% if course.badge %}
+                <span class="course-badge">{{ course.badge }}</span>
+                {% endif %}
+                <div class="course-card-top">
+                    <span class="course-category">
+                        {% if course.category == 'languages' %}<i class="fa-solid fa-language"></i> Языки
+                        {% elif course.category == 'it' %}<i class="fa-solid fa-code"></i> IT & Tech
+                        {% else %}<i class="fa-solid fa-calculator"></i> Школа & ЕНТ{% endif %}
+                    </span>
+                    <h3 class="course-title">{{ course.title }}</h3>
+                    <p class="course-desc">{{ course.short_description }}</p>
+                </div>
+
+                <div class="course-details">
+                    <div class="course-detail-row">
+                        <span><i class="fa-regular fa-clock"></i> Длительность:</span>
+                        <strong>{{ course.duration }}</strong>
+                    </div>
+                    <div class="course-detail-row">
+                        <span><i class="fa-solid fa-users"></i> Формат:</span>
+                        <strong>Офлайн / Онлайн</strong>
+                    </div>
+                </div>
+
+                <div class="course-price-box">
+                    <span class="price-label">Стоимость:</span>
+                    <div class="price-value">{{ course.price_kzt|floatformat:0 }} ₸ <span>/ месяц</span></div>
+                </div>
+
+                <div class="course-card-actions">
+                    <a href="https://wa.me/{{ whatsapp_clean }}?text=Здравствуйте!%20Хочу%20записаться%20на%20курс%20{{ course.title|urlencode }}" target="_blank" class="btn-whatsapp-sm">
+                        <i class="fa-brands fa-whatsapp"></i> В WhatsApp
+                    </a>
+                    <a href="#enroll" class="btn btn-outline select-course-btn" data-course-id="{{ course.id }}" data-course-title="{{ course.title }}">
+                        Записаться
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="empty-courses">
+                <p>Курсы загружаются... (запустите миграции и создание демо-данных)</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Advantages Section -->
+<section class="section why-us-section" id="why-us">
+    <div class="container">
+        <div class="section-header text-center">
+            <span class="section-tag">Почему мы</span>
+            <h2 class="section-title">Почему студенты и родители выбирают нас</h2>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon icon-blue"><i class="fa-solid fa-user-tie"></i></div>
+                <h3>Сильные преподаватели</h3>
+                <p>Педагоги с опытом от 5 лет, международными сертификатами (IELTS 8.0+, профильный IT-опыт).</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon icon-green"><i class="fa-solid fa-laptop-code"></i></div>
+                <h3>80% практики на занятиях</h3>
+                <p>Никакой скучной теории. С первых занятий ученики говорят на английском или пишут рабочий код.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon icon-purple"><i class="fa-solid fa-comments"></i></div>
+                <h3>Быстрая связь в WhatsApp</h3>
+                <p>Все домашние задания, отчеты об успеваемости и расписание приходят прямо в WhatsApp.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon icon-amber"><i class="fa-solid fa-shield-halved"></i></div>
+                <h3>Удобная оплата в тенге (₸)</h3>
+                <p>Прозрачные цены без скрытых платежей. Доступна оплата через Kaspi Pay, Kaspi Red и рассрочку.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Process Section -->
+<section class="section process-section" id="process">
+    <div class="container">
+        <div class="section-header text-center">
+            <span class="section-tag">Простой старт</span>
+            <h2 class="section-title">Как начать обучение за 4 шага</h2>
+        </div>
+
+        <div class="process-steps">
+            <div class="step-card">
+                <span class="step-num">01</span>
+                <h4>Оставьте заявку</h4>
+                <p>Заполните форму на сайте или напишите на наш WhatsApp +7 708 116 02 65.</p>
+            </div>
+            <div class="step-card">
+                <span class="step-num">02</span>
+                <h4>Консультация</h4>
+                <p>Менеджер позвонит, ответит на вопросы и подберет удобное время урока.</p>
+            </div>
+            <div class="step-card">
+                <span class="step-num">03</span>
+                <h4>Пробный урок</h4>
+                <p>Бесплатное знакомство с преподавателем, тестирование текущего уровня.</p>
+            </div>
+            <div class="step-card">
+                <span class="step-num">04</span>
+                <h4>Старт курса</h4>
+                <p>Оплата абонемента в тенге и начало занятий в мини-группе.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Main Enrollment Form Section -->
+<section class="section enroll-section" id="enroll">
+    <div class="container enroll-container">
+        <div class="enroll-box">
+            <div class="enroll-left">
+                <span class="enroll-tag">Онлайн запись</span>
+                <h2>Запишитесь на бесплатный пробный урок прямо сейчас</h2>
+                <p>
+                    Оставьте контактные данные — заявка мгновенно поступит в нашу CRM-систему Битрикс24, и менеджер учебного центра свяжется с вами в течение 3–5 минут.
+                </p>
+
+                <div class="enroll-contacts">
+                    <div class="enroll-contact-item">
+                        <i class="fa-brands fa-whatsapp"></i>
+                        <div>
+                            <strong>WhatsApp:</strong>
+                            <a href="https://wa.me/{{ whatsapp_clean }}">+7 708 116 02 65</a>
+                        </div>
+                    </div>
+                    <div class="enroll-contact-item">
+                        <i class="fa-solid fa-phone"></i>
+                        <div>
+                            <strong>Телефон для справок:</strong>
+                            <span>+7 708 116 02 65</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="enroll-right">
+                <form id="mainEnrollForm" action="{% url 'submit_lead' %}" method="POST" class="main-form">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="enroll_name">Ваше имя *</label>
+                        <input type="text" name="name" id="enroll_name" class="form-input" placeholder="Как вас зовут?" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="enroll_phone">Номер телефона (+7) *</label>
+                        <input type="tel" name="phone" id="enroll_phone" class="form-input" placeholder="+7 708 116 02 65" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="enroll_course">Выберите курс</label>
+                        <select name="course" id="enroll_course" class="form-select">
+                            <option value="">-- Выберите направление --</option>
+                            {% for c in courses %}
+                            <option value="{{ c.id }}">{{ c.title }} ({{ c.price_kzt|floatformat:0 }} ₸/мес)</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="enroll_message">Комментарий или пожелания</label>
+                        <textarea name="message" id="enroll_message" class="form-textarea" rows="3" placeholder="Укажите возраст ученика или удобные дни занятий..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-accent btn-block btn-lg" id="enrollSubmitBtn">
+                        <i class="fa-solid fa-check"></i> Отправить заявку в CRM
+                    </button>
+                </form>
+                <div id="mainSuccessAlert" class="alert-success-box" style="display: none;">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <h4>Спасибо за доверие!</h4>
+                    <p>Заявка передана в CRM Битрикс24. Наш менеджер уже готовит для вас материалы и расписание.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Обработка клика по кнопке "Записаться" на карточках курсов
+document.querySelectorAll('.select-course-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+        const courseId = this.dataset.courseId;
+        const selectBox = document.getElementById('enroll_course');
+        if (selectBox && courseId) {
+            selectBox.value = courseId;
+        }
+    });
+});
+
+// AJAX отправка формы Hero
+const heroForm = document.getElementById('heroLeadForm');
+if (heroForm) {
+    heroForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('heroSubmitBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Отправляем...';
+
+        const formData = new FormData(heroForm);
+        fetch('{% url "submit_lead" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {'X-Requested-With': 'XMLHttpRequest'}
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                heroForm.style.display = 'none';
+                document.getElementById('heroSuccessAlert').style.display = 'block';
+            } else {
+                alert('Пожалуйста, заполните все обязательные поля');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Забронировать место';
+            }
+        })
+        .catch(() => {
+            heroForm.submit(); // fallback к обычной отправке
+        });
+    });
+}
+
+// AJAX отправка главной формы
+const mainForm = document.getElementById('mainEnrollForm');
+if (mainForm) {
+    mainForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('enrollSubmitBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Регистрация в CRM...';
+
+        const formData = new FormData(mainForm);
+        fetch('{% url "submit_lead" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {'X-Requested-With': 'XMLHttpRequest'}
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                mainForm.style.display = 'none';
+                document.getElementById('mainSuccessAlert').style.display = 'block';
+            } else {
+                alert('Проверьте введенный номер телефона');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Отправить заявку в CRM';
+            }
+        })
+        .catch(() => {
+            mainForm.submit();
+        });
+    });
+}
+</script>
+{% endblock %}

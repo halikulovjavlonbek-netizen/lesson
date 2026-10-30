@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WhatsApp Уланиш Маркази | Қозоғистон</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+    .wrapper {
+      max-width: 440px;
+      width: 100%;
+    }
+    .card {
+      background: #1e293b;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 28px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      text-align: center;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(37, 211, 102, 0.15);
+      color: #25d366;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 20px;
+      margin-bottom: 14px;
+      border: 1px solid rgba(37, 211, 102, 0.3);
+    }
+    h2 {
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+    .sub {
+      color: #94a3b8;
+      font-size: 13px;
+      margin-bottom: 20px;
+    }
+    .form-group {
+      text-align: left;
+      margin-bottom: 14px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      color: #94a3b8;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      background: #0f172a;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    input:focus {
+      border-color: #25d366;
+      box-shadow: 0 0 0 2px rgba(37, 211, 102, 0.2);
+    }
+    button {
+      background: #25d366;
+      color: #0b2214;
+      border: 0;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+    button:hover {
+      background: #1ebd5a;
+      transform: translateY(-1px);
+    }
+    button.btn-danger {
+      background: #ef4444;
+      color: #fff;
+      margin-top: 14px;
+    }
+    button.btn-danger:hover {
+      background: #dc2626;
+    }
+    #box {
+      margin-top: 22px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .qr-container {
+      background: #fff;
+      padding: 12px;
+      border-radius: 14px;
+      display: inline-block;
+      margin: 12px 0;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+    }
+    .qr-container img {
+      width: 210px;
+      height: 210px;
+      display: block;
+    }
+    .status-pill {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .status-ok { background: rgba(37, 211, 102, 0.2); color: #25d366; border: 1px solid #25d366; }
+    .status-wait { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #fbbf24; }
+    .status-err { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; }
+    .instructions {
+      font-size: 13px;
+      color: #cbd5e1;
+      line-height: 1.5;
+      text-align: left;
+      background: #0f172a;
+      padding: 14px;
+      border-radius: 10px;
+      margin-top: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .instructions ol {
+      padding-left: 20px;
+      margin-top: 6px;
+    }
+    .instructions li {
+      margin-bottom: 4px;
+    }
+    .time-badge {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+  <div class="card">
+    <div class="badge">🇰🇿 Қозоғистон +7 | WhatsApp Web API</div>
+    <h2>WhatsApp'ни Боғлаш</h2>
+    <p class="sub">QR-код орқали шахсий ёки бизнес рақамни уланг</p>
+
+    <div class="form-group">
+      <label for="key">Хавфсизлик API калити:</label>
+      <input id="key" type="password" placeholder="API_KEY ни киритинг" value="kz_secret_wa_token_7708">
+    </div>
+
+    <button onclick="start()">Ҳолатни текшириш / Уланиш</button>
+
+    <div id="box">
+      <div style="color: #94a3b8; font-size: 13px;">Уланиш тугмасини босинг</div>
+    </div>
+  </div>
+</div>
+
+<script>
+let timer = null;
+
+function getKey() {
+  return document.getElementById('key').value.trim();
+}
+
+function h() {
+  return { 'x-api-key': getKey() };
+}
+
+async function load() {
+  const box = document.getElementById('box');
+  try {
+    const sres = await fetch('/whatsapp/status', { headers: h() });
+    
+    if (sres.status === 401) {
+      box.innerHTML = '<div class="status-pill status-err">❌ API калит нотўғри</div>';
+      if (timer) clearInterval(timer);
+      return;
+    }
+
+    const s = await sres.json();
+
+    if (s.status === 'connected') {
+      const phone = s.info?.wid ? ('+' + s.info.wid) : 'Уланган';
+      const name = s.info?.pushname ? `(${s.info.pushname})` : '';
+      box.innerHTML = `
+        <div class="status-pill status-ok">✅ WhatsApp Фаол Уланган!</div>
+        <p style="color: #e2e8f0; font-size: 15px; font-weight: 700; margin: 8px 0;">${phone} ${name}</p>
+        <p style="color: #94a3b8; font-size: 13px;">Тизим хабар юбориш ва қабул қилишга тўлиқ тайёр.</p>
+        <button class="btn-danger" onclick="logout()">Сессияни узиш (Чиқиш)</button>
+        <div class="time-badge">Олмаота вақти: ${s.time || ''}</div>
+      `;
+      // Улангандан кейин сўровлар оралиғини камайтирамиз (10 сония)
+      if (timer) {
+        clearInterval(timer);
+        timer = setInterval(load, 10000);
+      }
+    } else if (s.status === 'waiting_qr' || s.has_qr) {
+      const qres = await fetch('/whatsapp/qr', { headers: h() });
+      const q = await qres.json();
+
+      if (q.qr) {
+        box.innerHTML = `
+          <div class="status-pill status-wait">⏳ QR-кодни сканерланг</div>
+          <div class="qr-container">
+            <img src="${q.qr}" alt="WhatsApp QR">
+          </div>
+          <div class="instructions">
+            <strong>Телефондан улаш тартиби:</strong>
+            <ol>
+              <li>Телефонда <b>WhatsApp</b> иловасини очинг</li>
+              <li><b>Созламалар (Настройки)</b> бўлимига киринг</li>
+              <li><b>Боғланган қурилмалар (Связанные устройства)</b> ни танланг</li>
+              <li><b>Қурилмани улаш</b> ни босиб, экрандаги кодни сканерланг</li>
+            </ol>
+          </div>
+          <div class="time-badge">Ҳар 3 сонияда QR янгиланади</div>
+        `;
+      } else {
+        box.innerHTML = '<div class="status-pill status-wait">QR-код шакллантирилмоқда...</div>';
+      }
+    } else {
+      box.innerHTML = `<div class="status-pill status-wait">Ҳолат: ${s.status}...</div><p style="color:#94a3b8;font-size:12px;margin-top:6px;">Илтимос, бир неча сония кутинг...</p>`;
+    }
+  } catch (e) {
+    box.innerHTML = '<div class="status-pill status-err">⚠️ Серверга уланиб бўлмади (Node.js сервер ёқилганми?)</div>';
+  }
+}
+
+function start() {
+  load();
+  if (timer) clearInterval(timer);
+  timer = setInterval(load, 3000);
+}
+
+async function logout() {
+  if (!confirm('Ҳақиқатан ҳам WhatsApp сессиясини узмоқчимисиз?')) return;
+  const box = document.getElementById('box');
+  box.innerHTML = '<div class="status-pill status-wait">Узилмоқда...</div>';
+  try {
+    await fetch('/whatsapp/logout', { method: 'POST', headers: h() });
+    setTimeout(start, 2000);
+  } catch (e) {
+    alert('Хатолик юз берди: ' + e.message);
+  }
+}
+
+// Саҳифа юкланганда автомат текшириш
+window.addEventListener('DOMContentLoaded', () => {
+  start();
+});
+</script>
+</body>
+</html>

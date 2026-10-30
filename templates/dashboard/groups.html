@@ -1,0 +1,1545 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Группы и Студенты | Панель управления</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        /* ═══════════════════════════════════════════════════
+           🎨 UNIFIED ADMIN THEME — Оқ фон, Замонавий
+           ═══════════════════════════════════════════════════ */
+        :root {
+            --bg: #f5f6fa;
+            --surface: #ffffff;
+            --border: #e5e7eb;
+            --primary: #2563eb;
+            --primary-h: #1d4ed8;
+            --text: #111827;
+            --text-2: #6b7280;
+            --text-3: #9ca3af;
+            --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.08);
+            --shadow-md: 0 4px 16px -2px rgba(0, 0, 0, 0.1);
+            --radius: 14px;
+            --radius-sm: 9px;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* ── HEADER ── */
+        .dash-header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 0;
+            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .dash-header-inner {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dash-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .dash-logo-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .dash-logo-text {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--text);
+            line-height: 1.2;
+        }
+
+        .dash-logo-sub {
+            font-size: 11px;
+            color: var(--text-2);
+            font-weight: 500;
+        }
+
+        .dash-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-hdr {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 14px;
+            border-radius: 9px;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text-2);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .btn-hdr:hover {
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .btn-hdr-danger {
+            background: #fff0f0;
+            border-color: #fecaca;
+            color: #ef4444;
+        }
+
+        .btn-hdr-danger:hover {
+            background: #fee2e2;
+            border-color: #ef4444;
+        }
+
+        /* ── CONTAINER ── */
+        .dash-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px 24px 40px;
+        }
+
+        /* ── NAV ROWS ── */
+        .dash-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 24px;
+        }
+
+        .dash-nav-row {
+            display: flex;
+            gap: 4px;
+            background: var(--surface);
+            padding: 5px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .dash-nav-row::-webkit-scrollbar {
+            display: none;
+        }
+
+        .dash-nav-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-3);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            padding: 2px 8px;
+            align-self: center;
+            flex-shrink: 0;
+        }
+
+        .nav-divider {
+            width: 1px;
+            background: var(--border);
+            margin: 4px 2px;
+            flex-shrink: 0;
+        }
+
+        .dash-tab {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 13px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-2);
+            text-decoration: none;
+            white-space: nowrap;
+            flex-shrink: 0;
+            transition: all 0.15s ease;
+            border: 1px solid transparent;
+        }
+
+        .dash-tab:hover {
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .dash-tab.active {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 3px 10px rgba(37, 99, 235, 0.3);
+        }
+
+        .dash-tab.active-tg {
+            background: #0284c7;
+            color: #fff;
+            box-shadow: 0 3px 10px rgba(2, 132, 199, 0.3);
+        }
+
+        .dash-tab.active-ig {
+            background: linear-gradient(135deg, #c13584, #e1306c);
+            color: #fff;
+            box-shadow: 0 3px 10px rgba(225, 48, 108, 0.3);
+        }
+
+        .tab-badge {
+            background: rgba(0, 0, 0, 0.1);
+            padding: 1px 6px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .dash-tab.active .tab-badge,
+        .dash-tab.active-tg .tab-badge,
+        .dash-tab.active-ig .tab-badge {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        /* ── PANELS ── */
+        .panel-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 20px;
+        }
+
+        .panel-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* ── STAT CARDS ── */
+        .dash-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .stat-card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .icon-blue {
+            background: #eff6ff;
+            color: #2563eb;
+        }
+
+        .icon-green {
+            background: #f0fdf4;
+            color: #16a34a;
+        }
+
+        .icon-amber {
+            background: #fffbeb;
+            color: #d97706;
+        }
+
+        .icon-purple {
+            background: #faf5ff;
+            color: #7c3aed;
+        }
+
+        .icon-red {
+            background: #fff1f2;
+            color: #e11d48;
+        }
+
+        .icon-wa {
+            background: #f0fdf4;
+            color: #16a34a;
+        }
+
+        .stat-card h3 {
+            font-size: 22px;
+            font-weight: 800;
+            margin: 0 0 2px;
+            color: var(--text);
+        }
+
+        .stat-card p {
+            font-size: 13px;
+            color: var(--text-2);
+            margin: 0;
+        }
+
+        /* ── TABLE ── */
+        .leads-table-wrapper {
+            overflow-x: auto;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .leads-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            min-width: 700px;
+        }
+
+        .leads-table th {
+            padding: 12px 14px;
+            background: #f9fafb;
+            color: var(--text-2);
+            font-size: 12px;
+            font-weight: 700;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .leads-table td {
+            padding: 14px;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 13.5px;
+            vertical-align: middle;
+            color: var(--text);
+        }
+
+        .leads-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .leads-table tr:hover td {
+            background: #fafafa;
+        }
+
+        /* ── STATUS BADGES ── */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 11px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .status-new {
+            background: #eff6ff;
+            color: #2563eb;
+            border: 1px solid #bfdbfe;
+        }
+
+        .status-progress {
+            background: #fffbeb;
+            color: #d97706;
+            border: 1px solid #fde68a;
+        }
+
+        .status-paid {
+            background: #f0fdf4;
+            color: #16a34a;
+            border: 1px solid #bbf7d0;
+        }
+
+        .status-cancelled {
+            background: #fff1f2;
+            color: #e11d48;
+            border: 1px solid #fecdd3;
+        }
+
+        /* ── ACTION BUTTONS ── */
+        .table-actions {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            white-space: nowrap;
+        }
+
+        .btn-table-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            color: var(--text);
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+        }
+
+        .btn-table-action:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+
+        .btn-table-danger {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            background: #fff1f2;
+            border: 1px solid #fecdd3;
+            color: #e11d48;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.15s ease;
+            flex-shrink: 0;
+        }
+
+        .btn-table-danger:hover {
+            background: #fee2e2;
+            border-color: #fca5a5;
+        }
+
+        /* ── FORMS ── */
+        .form-input,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+            background: #f9fafb;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            color: var(--text);
+            padding: 10px 14px;
+            font-size: 13.5px;
+            outline: none;
+            box-sizing: border-box;
+            font-family: inherit;
+            transition: all 0.15s ease;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+            background: #fff;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-2);
+            margin-bottom: 6px;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        /* ── BUTTONS ── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border-radius: 9px;
+            font-size: 13.5px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-h);
+        }
+
+        .btn-outline {
+            background: #fff;
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-outline:hover {
+            background: var(--bg);
+        }
+
+        .btn-accent {
+            background: #10b981;
+            color: #fff;
+        }
+
+        .btn-accent:hover {
+            background: #059669;
+        }
+
+        .btn-block {
+            width: 100%;
+            justify-content: center;
+        }
+
+        /* ── TEXT ── */
+        .client-name {
+            font-weight: 700;
+            color: var(--text);
+            display: block;
+            font-size: 14px;
+        }
+
+        .client-date {
+            font-size: 12px;
+            color: var(--text-3);
+        }
+
+        .client-course {
+            color: #2563eb;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .lead-msg-bubble {
+            font-size: 12px;
+            color: var(--text-2);
+            margin-top: 6px;
+            background: #f9fafb;
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            padding: 5px 9px;
+            max-width: 280px;
+            max-height: 60px;
+            overflow-y: auto;
+            word-break: break-word;
+            line-height: 1.4;
+        }
+
+        /* ── WA BUTTON ── */
+        .btn-wa-chat {
+            background: #16a34a;
+            color: #fff !important;
+            padding: 7px 13px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+        }
+
+        .btn-wa-chat:hover {
+            background: #15803d;
+        }
+
+        /* ── ANALYTICS ── */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .metric-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 22px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .metric-title {
+            font-size: 12px;
+            color: var(--text-2);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .metric-val {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--text);
+        }
+
+        .metric-sub {
+            font-size: 12px;
+            margin-top: 6px;
+            color: var(--text-2);
+        }
+
+        .val-green {
+            color: #16a34a;
+        }
+
+        .val-amber {
+            color: #d97706;
+        }
+
+        .val-red {
+            color: #e11d48;
+        }
+
+        .val-blue {
+            color: #2563eb;
+        }
+
+        .progress-bar-bg {
+            background: #f3f4f6;
+            height: 8px;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: 8px;
+        }
+
+        /* ── MESSAGES ── */
+        .dash-messages {
+            margin-bottom: 20px;
+        }
+
+        .dash-msg-ok {
+            background: #f0fdf4;
+            border: 1px solid #86efac;
+            color: #166534;
+            padding: 12px 16px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13.5px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .dash-msg-err {
+            background: #fff1f2;
+            border: 1px solid #fca5a5;
+            color: #9f1239;
+            padding: 12px 16px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13.5px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        /* ── MAIN GRID ── */
+        .dash-main-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 360px;
+            gap: 24px;
+        }
+
+        .dash-main-grid>div {
+            min-width: 0;
+        }
+
+        @media (max-width: 1100px) {
+            .dash-main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    
+        /* ── UNIFIED ACTION BUTTONS ── */
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            height: 38px;
+            padding: 0 16px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid transparent;
+            cursor: pointer;
+            text-decoration: none !important;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+            user-select: none;
+            line-height: 1;
+            box-sizing: border-box;
+        }
+        .btn-action.btn-outline {
+            background: var(--surface);
+            border-color: var(--border);
+            color: var(--text);
+        }
+        .btn-action.btn-outline:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            color: #0f172a;
+        }
+        .btn-action.btn-primary {
+            background: var(--primary);
+            color: #ffffff !important;
+            border-color: var(--primary);
+            box-shadow: 0 2px 6px rgba(37,99,235,0.25);
+        }
+        .btn-action.btn-primary:hover {
+            background: var(--primary-h);
+            border-color: var(--primary-h);
+        }
+
+        /* ── GROUPS TOP ROW ── */
+        .top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        /* ── GROUPS GRID & CARDS ── */
+        .groups-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        @media (max-width: 640px) {
+            .groups-grid { grid-template-columns: 1fr; }
+        }
+        .group-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.15s ease;
+            position: relative;
+        }
+        .group-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+        .group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+        .group-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text);
+            margin: 0 0 3px 0;
+        }
+        .group-subject {
+            font-size: 13px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+        .group-badge-count {
+            font-size: 11.5px;
+            background: #eff6ff;
+            color: #2563eb;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 700;
+            white-space: nowrap;
+            border: 1px solid #bfdbfe;
+        }
+        .teacher-badge {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+        .badge-unassigned {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #ef4444;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 11.5px;
+            font-weight: 700;
+            display: inline-block;
+        }
+        .lessons-badge-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+        .lesson-tag {
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            color: var(--text-2);
+            font-size: 11.5px;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .students-section {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+        .students-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-2);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+        .student-chip {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            padding: 6px 10px;
+            margin-bottom: 6px;
+            font-size: 12.5px;
+            color: var(--text);
+            transition: all 0.15s ease;
+        }
+        .student-chip:last-child { margin-bottom: 0; }
+        .student-chip:hover {
+            border-color: #cbd5e1;
+            background: #fdfdfd;
+        }
+        .student-del-btn {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            text-decoration: none !important;
+            font-size: 16px;
+            font-weight: bold;
+            line-height: 1;
+            transition: all 0.15s ease;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+        .student-del-btn:hover {
+            background: #fee2e2;
+            color: #ef4444;
+            border-color: #fca5a5;
+        }
+        .card-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-top: 14px;
+            border-top: 1px solid var(--border);
+        }
+        .card-actions .btn-action {
+            height: 34px;
+            font-size: 12px;
+        }
+
+        /* ── MODALS (UNIFIED LIGHT THEME) ── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-content {
+            background: var(--surface);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-md);
+            width: 100%;
+            max-width: 520px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 24px;
+            color: var(--text);
+            position: relative;
+        }
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border);
+        }
+        .modal-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--text-3);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 6px;
+            line-height: 1;
+            transition: all 0.15s ease;
+        }
+        .modal-close:hover {
+            color: var(--text);
+            background: #f1f5f9;
+        }
+        .modal-footer {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+        .form-row {
+            margin-bottom: 16px;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <header class="dash-header">
+        <div class="dash-header-inner">
+            <a href="{% url 'admin_dashboard' %}" class="dash-logo">
+                <div class="dash-logo-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+                        <path d="M6 12v5c3 3 9 3 12 0v-5" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="dash-logo-text">Учебный Центр CRM</div>
+                    <div class="dash-logo-sub">Панель Управления</div>
+                </div>
+            </a>
+            <div class="dash-header-actions">
+                <a href="{% url 'home' %}" target="_blank" class="btn-hdr">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                        <polyline points="15 3 21 3 21 9" />
+                        <line x1="10" y1="14" x2="21" y2="3" />
+                    </svg>
+                    Сайт
+                </a>
+                <a href="{% url 'admin_logout' %}" class="btn-hdr btn-hdr-danger">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16 17 21 12 16 7" />
+                        <line x1="21" y1="12" x2="9" y2="12" />
+                    </svg>
+                    Выход
+                </a>
+            </div>
+        </div>
+    </header>
+
+
+    <div class="dash-container">
+
+        <!-- Меню шт.бов -->
+        <div class="dash-nav">
+            <div class="dash-nav-row">
+                <span class="dash-nav-label">CRM</span>
+                <div class="nav-divider"></div>
+                <a href="{% url 'admin_dashboard' %}?tab=leads" class="dash-tab">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+                        <rect x="9" y="3" width="6" height="4" rx="1" />
+                        <path d="m9 12 2 2 4-4" />
+                    </svg>
+                    Заявки
+                </a>
+                <a href="{% url 'admin_dashboard' %}?tab=staff" class="dash-tab">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg>
+                    Сотрудники
+                </a>
+                <a href="{% url 'admin_dashboard' %}?tab=rent" class="dash-tab">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                        <polyline points="9 22 9 12 15 12 15 22" />
+                    </svg>
+                    Аренда
+                </a>
+                <a href="{% url 'admin_dashboard' %}?tab=analytics" class="dash-tab">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="20" x2="18" y2="10" />
+                        <line x1="12" y1="20" x2="12" y2="4" />
+                        <line x1="6" y1="20" x2="6" y2="14" />
+                    </svg>
+                    Аналитика
+                </a>
+                <a href="{% url 'dashboard_kanban' %}" class="dash-tab">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7" />
+                        <rect x="14" y="3" width="7" height="7" />
+                        <rect x="14" y="14" width="7" height="7" />
+                        <rect x="3" y="14" width="7" height="7" />
+                    </svg>
+                    Kanban CRM
+                </a>
+            </div>
+            <div class="dash-nav-row">
+                <span class="dash-nav-label">Мессенджеры</span>
+                <div class="nav-divider"></div>
+                <a href="{% url 'admin_dashboard' %}?tab=leads" class="dash-tab" style="color:#16a34a;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.746.953 3.71 1.456 5.711 1.456h.005c6.554 0 11.89-5.336 11.893-11.893a11.821 11.821 0 00-3.48-8.414z" />
+                    </svg>
+                    WhatsApp
+                </a>
+                <a href="{% url 'dashboard_telegram' %}" class="dash-tab" style="color:#0284c7;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.75-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z" />
+                    </svg>
+                    Telegram
+                </a>
+                <a href="{% url 'dashboard_instagram' %}" class="dash-tab" style="color:#c13584;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                    </svg>
+                    Instagram
+                </a>
+                <div class="nav-divider"></div>
+                <span class="dash-nav-label">Обучение</span>
+                <div class="nav-divider"></div>
+                <a href="{% url 'dashboard_schedule' %}" class="dash-tab">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                    </svg>
+                    Расписание
+                </a>
+                <a href="{% url 'dashboard_teachers' %}" class="dash-tab">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+                        <path d="M6 12v5c3 3 9 3 12 0v-5" />
+                    </svg>
+                    Преподаватели
+                </a>
+                <a href="{% url 'dashboard_groups' %}" class="dash-tab {% if active_tab == 'groups' %}active{% endif %}">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg>
+                    Группы
+                </a>
+                <a href="{% url 'dashboard_schedule_settings' %}" class="dash-tab">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3" />
+                        <path
+                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                    </svg>
+                    Настройки
+                </a>
+            </div>
+        </div>
+
+
+        {% if messages %}
+        <div class="dash-messages">
+            {% for msg in messages %}
+            {% if msg.tags == 'error' %}
+            <div class="dash-msg-err">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="15" y1="9" x2="9" y2="15" />
+                    <line x1="9" y1="9" x2="15" y2="15" />
+                </svg>
+                {{ msg }}
+            </div>
+            {% else %}
+            <div class="dash-msg-ok">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                </svg>
+
+
+                {{ msg }}
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+
+        <div class="top-row">
+            <div>
+                <h1 style="font-size: 24px; font-weight: 800; margin: 0 0 6px 0; color: var(--text);">
+                    👥 Учебные группы
+                </h1>
+                <p style="font-size: 13px; color: var(--text-2); margin: 0;">
+                    Всего групп: <strong>{{ total_groups }}</strong> • Всего учащихся в группах: <strong
+                        style="color: #60a5fa;">{{ total_students }}</strong>
+                </p>
+            </div>
+            <button type="button" class="btn-action btn-primary" onclick="openCreateGroupModal()">
+                <i class="fa-solid fa-plus"></i> Создать группу
+            </button>
+        </div>
+
+        <!-- Сетка групп -->
+        <div class="groups-grid">
+            {% for grp in groups %}
+            <div class="group-card" style="border-top: 4px solid {{ grp.color|default:'#3b82f6' }};">
+                <div>
+                    <div class="group-header">
+                        <div>
+                            <h3 class="group-title">{{ grp.name }}</h3>
+                            <div class="group-subject">{{ grp.subject }}</div>
+                        </div>
+                        <span
+                            style="font-size: 11px; background: rgba(59,130,246,0.15); color: #60a5fa; padding: 3px 8px; border-radius: 6px; font-weight: 700;">
+                            <i class="fa-solid fa-user-group"></i> {{ grp.student_count }} уч.
+                        </span>
+                    </div>
+
+                    <!-- Закрепленный преподаватель -->
+                    <div class="teacher-badge">
+                        <i class="fa-solid fa-chalkboard-user" style="color: #60a5fa; font-size: 16px;"></i>
+                        <div>
+                            <span style="font-size: 11px; color: #94a3b8; display: block;">Преподаватель:</span>
+                            <strong style="color: var(--text);">
+                                {% if grp.teacher %}{{ grp.teacher.full_name }}{% else %}<span class="badge-unassigned">Не назначен</span>{% endif %}
+                            </strong>
+                        </div>
+                    </div>
+
+                    <!-- Уроки в расписании -->
+                    <div style="margin-bottom: 8px;">
+                        <span
+                            style="font-size: 11.5px; font-weight: 700; color: #94a3b8; display: block; margin-bottom: 4px;">
+                            Дни уроков:
+                        </span>
+                        <div class="lessons-badge-list">
+                            {% for les in grp.lessons.all %}
+                            <span class="lesson-tag" title="{{ les.room|default:'Аудитория не указана' }}">
+                                <i class="fa-regular fa-clock"></i> {{ les.get_day_of_week_display|slice:":3" }}: {{
+                                les.start_time|time:"H:i" }}–{{ les.end_time|time:"H:i" }}
+                            </span>
+                            {% empty %}
+                            <span style="font-size: 11.5px; color: #64748b; font-style: italic;">
+                                Уроки еще не назначены в расписании
+                            </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Список студентов группы -->
+                    <div class="students-section">
+                        <div class="students-head">
+                            <span>Студенты ({{ grp.students.count }}):</span>
+                            <button type="button" class="btn-action btn-outline"
+                                style="padding: 2px 8px; font-size: 11px;"
+                                onclick="openAddStudentModal({{ grp.id }}, '{{ grp.name|escapejs }}')">
+                                + Ученик
+                            </button>
+                        </div>
+                        <div style="max-height: 110px; overflow-y: auto;">
+                            {% for st in grp.students.all %}
+                            <div class="student-chip">
+                                <span><strong>{{ st.full_name }}</strong> <small
+                                        style="color: #94a3b8; margin-left: 4px;">{{ st.phone }}</small></span>
+                                <a href="?delete_student={{ st.id }}" class="student-del-btn"
+                                    onclick="return confirm('Удалить {{ st.full_name|escapejs }} из группы?')"
+                                    title="Удалить">
+                                    &times;
+                                </a>
+                            </div>
+                            {% empty %}
+                            <div style="font-size: 11.5px; color: #64748b; text-align: center; padding: 8px 0;">
+                                Нет учащихся. Нажмите «+ Ученик»
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Кнопки управления карточкой -->
+                <div class="card-actions">
+                    <button type="button" class="btn-action btn-outline"
+                        style="flex: 1; font-size: 11.5px; color: #34d399;"
+                        onclick="openAssignSlotModal({{ grp.id }}, '{{ grp.name|escapejs }}', '{{ grp.teacher.full_name|default:''|escapejs }}')">
+                        <i class="fa-solid fa-calendar-plus"></i> В расписание
+                    </button>
+                    <button type="button" class="btn-action btn-outline" style="padding: 8px 12px; font-size: 12px;"
+                        onclick="openEditGroupModal({{ grp.id }}, '{{ grp.name|escapejs }}', '{{ grp.subject|escapejs }}', '{{ grp.teacher_id|default:'' }}', '{{ grp.color|default:'#3b82f6'|escapejs }}')">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <a href="?delete_group={{ grp.id }}" class="btn-action btn-outline"
+                        style="padding: 8px 12px; font-size: 12px; color: #f87171;"
+                        onclick="return confirm('Удалить группу {{ grp.name|escapejs }}?')" title="Удалить">
+                        <i class="fa-solid fa-trash"></i>
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <div
+                style="grid-column: 1 / -1; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; text-align: center; padding: 60px 20px; box-shadow: var(--shadow-sm);">
+                <i class="fa-solid fa-graduation-cap"
+                    style="font-size: 40px; color: #64748b; margin-bottom: 14px; display: block;"></i>
+                <h3 style="font-size: 18px; margin: 0 0 6px 0; color: var(--text);">Групп пока нет</h3>
+                <p style="color: #94a3b8; font-size: 13px; margin: 0 0 16px 0;">Создайте первую учебную группу и
+                    добавьте в нее учащихся.</p>
+                <button type="button" class="btn-action btn-primary" onclick="openCreateGroupModal()">
+                    <i class="fa-solid fa-plus"></i> Создать группу
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО 1: Создание / Редактирование группы -->
+    <div id="groupModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="groupModalTitle">Создать учебную группу</h3>
+                <button type="button" class="modal-close" onclick="closeGroupModal()">&times;</button>
+            </div>
+
+            <form method="POST" action="{% url 'dashboard_groups' %}">
+                {% csrf_token %}
+                <input type="hidden" name="create_group" id="actionCreateGroup" value="1">
+                <input type="hidden" name="edit_group" id="actionEditGroup" value="" disabled>
+                <input type="hidden" name="group_id" id="modalGroupId" value="">
+
+                <div class="form-row">
+                    <label class="form-label">Название группы *</label>
+                    <input type="text" name="name" id="groupName" class="form-input"
+                        placeholder="Например: PY-101 или IELTS-Morning" required>
+                </div>
+
+                <div class="form-row">
+                    <label class="form-label">Предмет / Курс *</label>
+                    <input type="text" name="subject" id="groupSubject" class="form-input"
+                        placeholder="Например: Python для новичков" required>
+                </div>
+
+                <div class="form-row">
+                    <label class="form-label">Преподаватель</label>
+                    <select name="teacher_id" id="groupTeacherId" class="form-select">
+                        <option value="">-- Назначить позже --</option>
+                        {% for t in teachers %}
+                        <option value="{{ t.id }}">{{ t.full_name }} ({{ t.subjects }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <label class="form-label">Цвет бейджа группы</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="color" name="color" id="groupColor" value="#3b82f6"
+                            style="width: 44px; height: 38px; border: none; border-radius: 8px; cursor: pointer; background: transparent;">
+                        <span style="font-size: 12px; color: #9ca3af;">Цвет плашки в сетке расписания</span>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-action btn-outline" onclick="closeGroupModal()">Отмена</button>
+                    <button type="submit" class="btn-action btn-primary">
+                        <i class="fa-solid fa-check"></i> Сохранить
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО 2: Добавление студента в группу -->
+    <div id="studentModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fa-solid fa-user-plus" style="color: #60a5fa;"></i>
+                    Добавить ученика в группу
+                </h3>
+                <button type="button" class="modal-close" onclick="closeStudentModal()">&times;</button>
+            </div>
+
+            <form method="POST" action="{% url 'dashboard_groups' %}">
+                {% csrf_token %}
+                <input type="hidden" name="add_student" value="1">
+                <input type="hidden" name="group_id" id="studentGroupId" value="">
+
+                <div
+                    style="background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin-bottom: 16px; font-size: 13px; color: var(--text-2);">
+                    Группа: <strong id="studentGroupName" style="color: #60a5fa;"></strong>
+                </div>
+
+                <div class="form-row">
+                    <label class="form-label">Ф.И.О. учащегося *</label>
+                    <input type="text" name="student_name" class="form-input" placeholder="Например: Арман Серікұлы"
+                        required>
+                </div>
+
+                <div class="form-row">
+                    <label class="form-label">Телефон ученика / родителя</label>
+                    <input type="text" name="student_phone" class="form-input" placeholder="+7 708 123 45 67">
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-action btn-outline" onclick="closeStudentModal()">Отмена</button>
+                    <button type="submit" class="btn-action btn-primary">
+                        <i class="fa-solid fa-check"></i> Добавить ученика
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО 3: Назначение группы на день и слот в расписании -->
+    <div id="assignSlotModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fa-solid fa-calendar-plus" style="color: #34d399;"></i>
+                    Назначить урок в сетку
+                </h3>
+                <button type="button" class="modal-close" onclick="closeAssignSlotModal()">&times;</button>
+            </div>
+
+            <form method="POST" action="{% url 'dashboard_groups' %}">
+                {% csrf_token %}
+                <input type="hidden" name="assign_slot" value="1">
+                <input type="hidden" name="group_id" id="assignGroupId" value="">
+
+                <div
+                    style="background: rgba(255,255,255,0.04); border-radius: 10px; padding: 12px; margin-bottom: 16px; font-size: 13px;">
+                    <div>Группа: <strong id="assignGroupName" style="color: #fff;"></strong></div>
+                    <div style="margin-top: 4px;">Учитель: <strong id="assignTeacherName"
+                            style="color: #93c5fd;"></strong></div>
+                </div>
+
+                <div class="form-row">
+                    <label class="form-label">День недели *</label>
+                    <select name="day_of_week" class="form-select" required>
+                        {% for d in days %}
+                        <option value="{{ d.0 }}">{{ d.1 }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <label class="form-label">Временной слот *</label>
+                    <select name="slot_time" class="form-select" required>
+                        {% for s in lesson_slots %}
+                        <option value="{{ s.start_str }}-{{ s.end_str }}">
+                            Слот {{ s.index }}: {{ s.label }} ({{ s.duration_min }} мин)
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <label class="form-label">Аудитория / Кабинет (необязательно)</label>
+                    <input type="text" name="room" class="form-input" placeholder="Например: Кабинет 101 / IT-lab">
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-action btn-outline"
+                        onclick="closeAssignSlotModal()">Отмена</button>
+                    <button type="submit" class="btn-action btn-primary" style="background: #10b981;">
+                        <i class="fa-solid fa-check"></i> Добавить в расписание
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openCreateGroupModal() {
+            document.getElementById('groupModalTitle').innerText = 'Создать новую учебную группу';
+            document.getElementById('actionCreateGroup').disabled = false;
+            document.getElementById('actionEditGroup').disabled = true;
+            document.getElementById('modalGroupId').value = '';
+            document.getElementById('groupName').value = '';
+            document.getElementById('groupSubject').value = '';
+            document.getElementById('groupTeacherId').value = '';
+            document.getElementById('groupColor').value = '#3b82f6';
+            document.getElementById('groupModal').classList.add('active');
+        }
+
+        function openEditGroupModal(id, name, subject, teacherId, color) {
+            document.getElementById('groupModalTitle').innerText = 'Редактировать группу';
+            document.getElementById('actionCreateGroup').disabled = true;
+            document.getElementById('actionEditGroup').disabled = false;
+            document.getElementById('actionEditGroup').value = '1';
+            document.getElementById('modalGroupId').value = id;
+            document.getElementById('groupName').value = name;
+            document.getElementById('groupSubject').value = subject;
+            document.getElementById('groupTeacherId').value = teacherId || '';
+            document.getElementById('groupColor').value = color || '#3b82f6';
+            document.getElementById('groupModal').classList.add('active');
+        }
+
+        function closeGroupModal() {
+            document.getElementById('groupModal').classList.remove('active');
+        }
+
+        function openAddStudentModal(groupId, groupName) {
+            document.getElementById('studentGroupId').value = groupId;
+            document.getElementById('studentGroupName').innerText = groupName;
+            document.getElementById('studentModal').classList.add('active');
+        }
+
+        function closeStudentModal() {
+            document.getElementById('studentModal').classList.remove('active');
+        }
+
+        function openAssignSlotModal(groupId, groupName, teacherName) {
+            document.getElementById('assignGroupId').value = groupId;
+            document.getElementById('assignGroupName').innerText = groupName;
+            document.getElementById('assignTeacherName').innerText = teacherName || 'Не назначен';
+            document.getElementById('assignSlotModal').classList.add('active');
+        }
+
+        function closeAssignSlotModal() {
+            document.getElementById('assignSlotModal').classList.remove('active');
+        }
+
+        window.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                closeGroupModal();
+                closeStudentModal();
+                closeAssignSlotModal();
+            }
+        });
+    </script>
+</body>
+
+</html>

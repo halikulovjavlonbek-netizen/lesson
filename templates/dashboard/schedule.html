@@ -1,0 +1,1292 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Расписание занятий преподавателей | Панель управления</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        /* ═══════════════════════════════════════════════════
+           🎨 UNIFIED ADMIN THEME — Оқ фон, Замонавий
+           ═══════════════════════════════════════════════════ */
+        :root {
+            --bg:        #f5f6fa;
+            --surface:   #ffffff;
+            --border:    #e5e7eb;
+            --primary:   #2563eb;
+            --primary-h: #1d4ed8;
+            --text:      #111827;
+            --text-2:    #6b7280;
+            --text-3:    #9ca3af;
+            --shadow-sm: 0 1px 3px 0 rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 16px -2px rgba(0,0,0,0.1);
+            --radius:    14px;
+            --radius-sm: 9px;
+        }
+        *, *::before, *::after { box-sizing: border-box; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+            margin: 0; padding: 0;
+        }
+        /* ── HEADER ── */
+        .dash-header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 0;
+            box-shadow: var(--shadow-sm);
+            position: sticky; top: 0; z-index: 100;
+        }
+        .dash-header-inner {
+            max-width: 1400px; margin: 0 auto; padding: 0 24px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .dash-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .dash-logo-icon {
+            width: 38px; height: 38px; border-radius: 10px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; color: #fff; flex-shrink: 0;
+        }
+        .dash-logo-text { font-size: 15px; font-weight: 800; color: var(--text); line-height: 1.2; }
+        .dash-logo-sub { font-size: 11px; color: var(--text-2); font-weight: 500; }
+        .dash-header-actions { display: flex; align-items: center; gap: 10px; }
+        .btn-hdr {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 8px 14px; border-radius: 9px; font-size: 13px; font-weight: 600;
+            text-decoration: none; border: 1px solid var(--border);
+            background: var(--surface); color: var(--text-2); cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .btn-hdr:hover { background: var(--bg); color: var(--text); }
+        .btn-hdr-danger { background: #fff0f0; border-color: #fecaca; color: #ef4444; }
+        .btn-hdr-danger:hover { background: #fee2e2; border-color: #ef4444; }
+        /* ── CONTAINER ── */
+        .dash-container { max-width: 1400px; margin: 0 auto; padding: 24px 24px 40px; }
+        /* ── NAV ROWS ── */
+        .dash-nav { display: flex; flex-direction: column; gap: 6px; margin-bottom: 24px; }
+        .dash-nav-row {
+            display: flex; gap: 4px;
+            background: var(--surface); padding: 5px;
+            border-radius: var(--radius); border: 1px solid var(--border);
+            overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none;
+        }
+        .dash-nav-row::-webkit-scrollbar { display: none; }
+        .dash-nav-label {
+            font-size: 10px; font-weight: 700; color: var(--text-3);
+            text-transform: uppercase; letter-spacing: 0.6px;
+            padding: 2px 8px; align-self: center; flex-shrink: 0;
+        }
+        .nav-divider { width: 1px; background: var(--border); margin: 4px 2px; flex-shrink: 0; }
+        .dash-tab {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 7px 13px; border-radius: var(--radius-sm);
+            font-size: 13px; font-weight: 600; color: var(--text-2);
+            text-decoration: none; white-space: nowrap; flex-shrink: 0;
+            transition: all 0.15s ease; border: 1px solid transparent;
+        }
+        .dash-tab:hover { background: var(--bg); color: var(--text); }
+        .dash-tab.active { background: var(--primary); color: #fff; box-shadow: 0 3px 10px rgba(37,99,235,0.3); }
+        .dash-tab.active-tg { background: #0284c7; color: #fff; box-shadow: 0 3px 10px rgba(2,132,199,0.3); }
+        .dash-tab.active-ig { background: linear-gradient(135deg,#c13584,#e1306c); color: #fff; box-shadow: 0 3px 10px rgba(225,48,108,0.3); }
+        .tab-badge {
+            background: rgba(0,0,0,0.1); padding: 1px 6px; border-radius: 20px; font-size: 11px; font-weight: 700;
+        }
+        .dash-tab.active .tab-badge, .dash-tab.active-tg .tab-badge, .dash-tab.active-ig .tab-badge {
+            background: rgba(255,255,255,0.25);
+        }
+        /* ── PANELS ── */
+        .panel-box {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 24px;
+            box-shadow: var(--shadow-sm); margin-bottom: 20px;
+        }
+        .panel-title {
+            font-size: 17px; font-weight: 700; color: var(--text);
+            margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between;
+        }
+        /* ── STAT CARDS ── */
+        .dash-stats-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 16px; margin-bottom: 24px; }
+        .stat-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 20px;
+            display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow-sm);
+        }
+        .stat-card-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+        .icon-blue   { background: #eff6ff; color: #2563eb; }
+        .icon-green  { background: #f0fdf4; color: #16a34a; }
+        .icon-amber  { background: #fffbeb; color: #d97706; }
+        .icon-purple { background: #faf5ff; color: #7c3aed; }
+        .icon-red    { background: #fff1f2; color: #e11d48; }
+        .icon-wa     { background: #f0fdf4; color: #16a34a; }
+        .stat-card h3 { font-size: 22px; font-weight: 800; margin: 0 0 2px; color: var(--text); }
+        .stat-card p  { font-size: 13px; color: var(--text-2); margin: 0; }
+        /* ── TABLE ── */
+        .leads-table-wrapper { overflow-x: auto; border-radius: 10px; border: 1px solid var(--border); }
+        .leads-table { width: 100%; border-collapse: collapse; text-align: left; min-width: 700px; }
+        .leads-table th { padding: 12px 14px; background: #f9fafb; color: var(--text-2); font-size: 12px; font-weight: 700; border-bottom: 1px solid var(--border); white-space: nowrap; text-transform: uppercase; letter-spacing: 0.4px; }
+        .leads-table td { padding: 14px; border-bottom: 1px solid #f3f4f6; font-size: 13.5px; vertical-align: middle; color: var(--text); }
+        .leads-table tr:last-child td { border-bottom: none; }
+        .leads-table tr:hover td { background: #fafafa; }
+        /* ── STATUS BADGES ── */
+        .status-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 11px; border-radius: 9999px; font-size: 12px; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
+        .status-new       { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+        .status-progress  { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+        .status-paid      { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+        .status-cancelled { background: #fff1f2; color: #e11d48; border: 1px solid #fecdd3; }
+        /* ── ACTION BUTTONS ── */
+        .table-actions { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+        .btn-table-action {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600;
+            background: #f8fafc; border: 1px solid var(--border); color: var(--text);
+            cursor: pointer; text-decoration: none; transition: all 0.15s ease; white-space: nowrap;
+        }
+        .btn-table-action:hover { background: #f1f5f9; border-color: #cbd5e1; }
+        .btn-table-danger {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 30px; height: 30px; border-radius: 8px;
+            background: #fff1f2; border: 1px solid #fecdd3; color: #e11d48;
+            cursor: pointer; text-decoration: none; transition: all 0.15s ease; flex-shrink: 0;
+        }
+        .btn-table-danger:hover { background: #fee2e2; border-color: #fca5a5; }
+        /* ── FORMS ── */
+        .form-input, .form-textarea, .form-select {
+            width: 100%; background: #f9fafb; border: 1px solid var(--border);
+            border-radius: 9px; color: var(--text); padding: 10px 14px;
+            font-size: 13.5px; outline: none; box-sizing: border-box;
+            font-family: inherit; transition: all 0.15s ease;
+        }
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.12); background: #fff;
+        }
+        .form-label { display: block; font-size: 12px; font-weight: 700; color: var(--text-2); margin-bottom: 6px; }
+        .form-group { margin-bottom: 14px; }
+        /* ── BUTTONS ── */
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 9px; font-size: 13.5px; font-weight: 700; border: none; cursor: pointer; text-decoration: none; transition: all 0.15s ease; white-space: nowrap; }
+        .btn-primary { background: var(--primary); color: #fff; }
+        .btn-primary:hover { background: var(--primary-h); }
+        .btn-outline { background: #fff; color: var(--text); border: 1px solid var(--border); }
+        .btn-outline:hover { background: var(--bg); }
+        .btn-accent { background: #10b981; color: #fff; }
+        .btn-accent:hover { background: #059669; }
+        .btn-block { width: 100%; justify-content: center; }
+        /* ── TEXT ── */
+        .client-name { font-weight: 700; color: var(--text); display: block; font-size: 14px; }
+        .client-date { font-size: 12px; color: var(--text-3); }
+        .client-course { color: #2563eb; font-weight: 600; font-size: 13px; }
+        .lead-msg-bubble { font-size: 12px; color: var(--text-2); margin-top: 6px; background: #f9fafb; border: 1px solid var(--border); border-radius: 7px; padding: 5px 9px; max-width: 280px; max-height: 60px; overflow-y: auto; word-break: break-word; line-height: 1.4; }
+        /* ── WA BUTTON ── */
+        .btn-wa-chat { background: #16a34a; color: #fff !important; padding: 7px 13px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s ease; white-space: nowrap; }
+        .btn-wa-chat:hover { background: #15803d; }
+        /* ── ANALYTICS ── */
+        .analytics-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap: 16px; margin-bottom: 24px; }
+        .metric-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow-sm); }
+        .metric-title { font-size: 12px; color: var(--text-2); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+        .metric-val { font-size: 26px; font-weight: 800; color: var(--text); }
+        .metric-sub { font-size: 12px; margin-top: 6px; color: var(--text-2); }
+        .val-green { color: #16a34a; }
+        .val-amber { color: #d97706; }
+        .val-red { color: #e11d48; }
+        .val-blue { color: #2563eb; }
+        .progress-bar-bg { background: #f3f4f6; height: 8px; border-radius: 8px; overflow: hidden; margin-top: 8px; }
+        .progress-bar-fill { height: 100%; border-radius: 8px; }
+        /* ── MESSAGES ── */
+        .dash-messages { margin-bottom: 20px; }
+        .dash-msg-ok { background: #f0fdf4; border: 1px solid #86efac; color: #166534; padding: 12px 16px; border-radius: 10px; display: flex; align-items: center; gap: 10px; font-size: 13.5px; font-weight: 600; margin-bottom: 8px; }
+        .dash-msg-err { background: #fff1f2; border: 1px solid #fca5a5; color: #9f1239; padding: 12px 16px; border-radius: 10px; display: flex; align-items: center; gap: 10px; font-size: 13.5px; font-weight: 600; margin-bottom: 8px; }
+        /* ── MAIN GRID ── */
+        .dash-main-grid { display: grid; grid-template-columns: minmax(0,1fr) 360px; gap: 24px; }
+        .dash-main-grid > div { min-width: 0; }
+        @media (max-width: 1100px) { .dash-main-grid { grid-template-columns: 1fr; } }
+
+    
+        /* ── UNIFIED ACTION BUTTONS ── */
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            height: 38px;
+            padding: 0 16px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid transparent;
+            cursor: pointer;
+            text-decoration: none !important;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+            user-select: none;
+            line-height: 1;
+            box-sizing: border-box;
+        }
+        .btn-action.btn-outline {
+            background: var(--surface);
+            border-color: var(--border);
+            color: var(--text);
+        }
+        .btn-action.btn-outline:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            color: #0f172a;
+        }
+        .btn-action.btn-primary {
+            background: var(--primary);
+            color: #ffffff !important;
+            border-color: var(--primary);
+            box-shadow: 0 2px 6px rgba(37,99,235,0.25);
+        }
+        .btn-action.btn-primary:hover {
+            background: var(--primary-h);
+            border-color: var(--primary-h);
+        }
+
+        /* ── SCHEDULE TOPBAR ── */
+        .schedule-topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .schedule-title-block h1 {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--text);
+            margin: 0 0 6px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .schedule-title-block p {
+            font-size: 13px;
+            color: var(--text-2);
+            margin: 0;
+            line-height: 1.5;
+        }
+        .schedule-top-actions {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* ── STATS ROW (GRID 4 COLS) ── */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        @media (max-width: 1024px) {
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 640px) {
+            .stats-row { grid-template-columns: 1fr; }
+        }
+        .stats-row .metric-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.15s ease;
+        }
+        .stats-row .metric-card:hover {
+            box-shadow: var(--shadow-md);
+        }
+        .stats-row .metric-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 19px;
+            flex-shrink: 0;
+        }
+        .stats-row .metric-value {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--text);
+            margin: 0 0 3px 0;
+            line-height: 1.1;
+        }
+        .stats-row .metric-label {
+            font-size: 12.5px;
+            color: var(--text-2);
+            margin: 0;
+            font-weight: 500;
+        }
+
+        /* ── FILTER CARD ── */
+        .filter-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            box-shadow: var(--shadow-sm);
+        }
+        .filter-inputs {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .filter-label {
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--text-2);
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .filter-select {
+            padding: 8px 12px;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 13px;
+            color: var(--text);
+            font-family: inherit;
+            outline: none;
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+        .filter-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+            background: #fff;
+        }
+        .legend-bar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 12px;
+            color: var(--text-2);
+            flex-wrap: wrap;
+        }
+        .legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .dot-free { background: #10b981; }
+        .dot-busy { background: #2563eb; }
+        .dot-break { background: #f59e0b; }
+
+        /* ── SCHEDULE TIMETABLE GRID ── */
+        .schedule-grid-wrap {
+            overflow-x: auto;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 40px;
+        }
+        .schedule-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            min-width: 960px;
+        }
+        .schedule-table th {
+            background: #f8fafc;
+            color: var(--text);
+            padding: 14px 12px;
+            font-size: 13px;
+            font-weight: 700;
+            border-bottom: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            text-align: center;
+        }
+        .schedule-table th:last-child {
+            border-right: none;
+        }
+        .schedule-table td {
+            padding: 8px;
+            border-bottom: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            vertical-align: top;
+            background: #ffffff;
+        }
+        .schedule-table td:last-child {
+            border-right: none;
+        }
+        .schedule-table tr:last-child td {
+            border-bottom: none;
+        }
+        .time-col {
+            width: 130px;
+            background: #fafafa !important;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text);
+            text-align: center;
+            vertical-align: middle !important;
+            padding: 10px !important;
+        }
+        .busy-slot-card {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-left: 4px solid var(--primary);
+            border-radius: 10px;
+            padding: 10px 12px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 86px;
+        }
+        .busy-slot-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+            border-color: #94a3b8;
+        }
+        .busy-group-name {
+            font-weight: 800;
+            font-size: 13.5px;
+            color: var(--text);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .busy-subject {
+            font-size: 12px;
+            color: var(--primary);
+            font-weight: 600;
+            margin-top: 2px;
+        }
+        .busy-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            color: var(--text-2);
+            margin-top: 8px;
+            padding-top: 6px;
+            border-top: 1px dashed #f1f5f9;
+        }
+        .busy-teacher {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 600;
+        }
+        .busy-room {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            color: #64748b;
+        }
+        .free-slot-card {
+            background: #f8fafc;
+            border: 1px dashed #cbd5e1;
+            border-radius: 10px;
+            padding: 12px 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            min-height: 86px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        .free-slot-card:hover {
+            background: #f0fdf4;
+            border-color: #86efac;
+            border-style: solid;
+            box-shadow: 0 2px 8px rgba(16,185,129,0.12);
+        }
+        .free-badge {
+            font-size: 12px;
+            font-weight: 700;
+            color: #16a34a;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .free-subtext {
+            font-size: 11px;
+            color: var(--text-3);
+        }
+        .break-row {
+            background: #fffbeb !important;
+        }
+        .break-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 11.5px;
+            font-weight: 600;
+            color: #d97706;
+            padding: 6px;
+        }
+
+        /* ── MODALS (UNIFIED LIGHT THEME) ── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-content {
+            background: var(--surface);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-md);
+            width: 100%;
+            max-width: 520px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 24px;
+            color: var(--text);
+            position: relative;
+        }
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border);
+        }
+        .modal-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--text-3);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 6px;
+            line-height: 1;
+            transition: all 0.15s ease;
+        }
+        .modal-close:hover {
+            color: var(--text);
+            background: #f1f5f9;
+        }
+        .modal-footer {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+        .conflict-alert {
+            display: none;
+            background: #fff1f2;
+            border: 1px solid #fecdd3;
+            color: #e11d48;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        .form-row {
+            margin-bottom: 16px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Шапка кабинета -->
+        <header class="dash-header">
+        <div class="dash-header-inner">
+            <a href="{% url 'admin_dashboard' %}" class="dash-logo">
+                <div class="dash-logo-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                </div>
+                <div>
+                    <div class="dash-logo-text">Учебный Центр CRM</div>
+                    <div class="dash-logo-sub">Панель Управления</div>
+                </div>
+            </a>
+            <div class="dash-header-actions">
+                <a href="{% url 'home' %}" target="_blank" class="btn-hdr">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    Сайт
+                </a>
+                <a href="{% url 'admin_logout' %}" class="btn-hdr btn-hdr-danger">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    Выход
+                </a>
+            </div>
+        </div>
+    </header>
+
+
+    <div class="dash-container">
+
+        <!-- Навигационные вкладки -->
+                <div class="dash-nav">
+            <div class="dash-nav-row">
+                <span class="dash-nav-label">CRM</span>
+                <div class="nav-divider"></div>
+                <a href="{% url 'admin_dashboard' %}?tab=leads" class="dash-tab">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="m9 12 2 2 4-4"/></svg>
+                    Заявки
+                </a>
+                <a href="{% url 'admin_dashboard' %}?tab=staff" class="dash-tab">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    Сотрудники
+                </a>
+                <a href="{% url 'admin_dashboard' %}?tab=rent" class="dash-tab">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    Аренда
+                </a>
+                <a href="{% url 'admin_dashboard' %}?tab=analytics" class="dash-tab">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                    Аналитика
+                </a>
+                <a href="{% url 'dashboard_kanban' %}" class="dash-tab">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    Kanban CRM
+                </a>
+            </div>
+            <div class="dash-nav-row">
+                <span class="dash-nav-label">Мессенджеры</span>
+                <div class="nav-divider"></div>
+                <a href="{% url 'admin_dashboard' %}?tab=leads" class="dash-tab" style="color:#16a34a;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.746.953 3.71 1.456 5.711 1.456h.005c6.554 0 11.89-5.336 11.893-11.893a11.821 11.821 0 00-3.48-8.414z"/></svg>
+                    WhatsApp
+                </a>
+                <a href="{% url 'dashboard_telegram' %}" class="dash-tab" style="color:#0284c7;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.75-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
+                    Telegram
+                </a>
+                <a href="{% url 'dashboard_instagram' %}" class="dash-tab" style="color:#c13584;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                    Instagram
+                </a>
+                <div class="nav-divider"></div>
+                <span class="dash-nav-label">Обучение</span>
+                <div class="nav-divider"></div>
+                <a href="{% url 'dashboard_schedule' %}" class="dash-tab {% if active_tab == 'schedule' or not active_tab %}active{% endif %}">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    Расписание
+                </a>
+                <a href="{% url 'dashboard_teachers' %}" class="dash-tab">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                    Преподаватели
+                </a>
+                <a href="{% url 'dashboard_groups' %}" class="dash-tab">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    Группы
+                </a>
+                <a href="{% url 'dashboard_schedule_settings' %}" class="dash-tab">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    Настройки
+                </a>
+            </div>
+        </div>
+
+
+                {% if messages %}
+        <div class="dash-messages">
+            {% for msg in messages %}
+            {% if msg.tags == 'error' %}
+            <div class="dash-msg-err">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                {{ msg }}
+            </div>
+            {% else %}
+            <div class="dash-msg-ok">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                {{ msg }}
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+
+        <!-- Верхняя панель заголовка и экспорта -->
+        <div class="schedule-topbar">
+            <div class="schedule-title-block">
+                <h1>
+                    <i class="fa-solid fa-clock" style="color: #60a5fa;"></i>
+                    Расписание преподавателей и групп
+                </h1>
+                <p>
+                    Рабочий день: <strong>{{ settings.day_start|time:"H:i" }} – {{ settings.day_end|time:"H:i" }}</strong> 
+                    • Длительность урока: <strong>{{ settings.lesson_duration }} мин</strong> 
+                    • Перерыв: <strong>{{ settings.break_duration }} мин</strong>
+                </p>
+            </div>
+            <div class="schedule-top-actions">
+                <button type="button" onclick="window.print()" class="btn-action btn-outline">
+                    <i class="fa-solid fa-print"></i> Печать
+                </button>
+                <a href="{% url 'dashboard_schedule_export' %}" class="btn-action btn-outline">
+                    <i class="fa-solid fa-file-excel" style="color: #10b981;"></i> Экспорт в Excel / CSV
+                </a>
+                <a href="{% url 'dashboard_schedule_settings' %}" class="btn-action btn-primary">
+                    <i class="fa-solid fa-gear"></i> Настроить слоты
+                </a>
+            </div>
+        </div>
+
+        <!-- 4 виджета сводки занятости (Availability Summary) -->
+        <div class="stats-row">
+            <div class="metric-card">
+                <div class="metric-icon icon-blue">
+                    <i class="fa-solid fa-book-open"></i>
+                </div>
+                <div>
+                    <h3 class="metric-value">{{ availability.total_lessons }}</h3>
+                    <p class="metric-label">
+                        {% if selected_teacher %}Уроков у преподавателя в нед.{% else %}Всего занятий в неделю{% endif %}
+                    </p>
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon icon-amber">
+                    <i class="fa-solid fa-stopwatch"></i>
+                </div>
+                <div>
+                    <h3 class="metric-value">{{ availability.busy_hours }} ч</h3>
+                    <p class="metric-label">Часов занятий (в неделю)</p>
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon icon-green">
+                    <i class="fa-solid fa-door-open"></i>
+                </div>
+                <div>
+                    <h3 class="metric-value" style="color: #34d399;">{{ availability.free_hours }} ч</h3>
+                    <p class="metric-label">
+                        {% if selected_teacher %}Свободных часов у преподавателя{% else %}Свободных часов всего{% endif %}
+                    </p>
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon icon-purple">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                <div>
+                    <h3 class="metric-value">{{ total_groups_count }}</h3>
+                    <p class="metric-label">Активных групп в центре</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Панель фильтров и легенда -->
+        <form method="GET" action="{% url 'dashboard_schedule' %}" class="filter-card">
+            <div class="filter-inputs">
+                <div class="filter-group">
+                    <span class="filter-label"><i class="fa-solid fa-user-tie"></i> Преподаватель:</span>
+                    <select name="teacher" class="filter-select" onchange="this.form.submit()">
+                        <option value="">Все преподаватели (общий вид)</option>
+                        {% for t in teachers %}
+                        <option value="{{ t.id }}" {% if selected_teacher_id == t.id|stringformat:"s" %}selected{% endif %}>
+                            {{ t.full_name }} ({{ t.subjects }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <span class="filter-label"><i class="fa-solid fa-graduation-cap"></i> Группа:</span>
+                    <select name="group" class="filter-select" onchange="this.form.submit()">
+                        <option value="">Все группы</option>
+                        {% for g in groups %}
+                        <option value="{{ g.id }}" {% if selected_group_id == g.id|stringformat:"s" %}selected{% endif %}>
+                            {{ g.name }} ({{ g.subject }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <span class="filter-label"><i class="fa-regular fa-calendar"></i> День:</span>
+                    <select name="day" class="filter-select" onchange="this.form.submit()">
+                        <option value="">Вся неделя (Пн–Вс)</option>
+                        {% for d in all_days %}
+                        <option value="{{ d.0 }}" {% if selected_day == d.0|stringformat:"s" %}selected{% endif %}>
+                            {{ d.1 }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                {% if selected_teacher_id or selected_group_id or selected_day %}
+                <a href="{% url 'dashboard_schedule' %}" class="btn-action btn-outline" style="font-size: 11px; padding: 6px 10px;">
+                    <i class="fa-solid fa-xmark"></i> Сбросить
+                </a>
+                {% endif %}
+            </div>
+
+            <!-- Легенда цветов -->
+            <div class="legend-bar">
+                <span class="legend-item"><span class="legend-dot dot-free"></span> <strong>Free</strong> — Свободно</span>
+                <span class="legend-item"><span class="legend-dot dot-busy"></span> <strong>Занято</strong> — Урок группы</span>
+                <span class="legend-item"><span class="legend-dot dot-break"></span> <strong>Перерыв</strong> ({{ settings.break_duration }} мин)</span>
+            </div>
+        </form>
+
+        <!-- Сетка расписания (Timetable Grid) -->
+        <div class="schedule-grid-wrap">
+            <table class="schedule-table">
+                <thead>
+                    <tr>
+                        <th>Время слота</th>
+                        {% for day in days %}
+                        <th>
+                            <div style="font-size: 14px; font-weight: 800;">{{ day.1 }}</div>
+                            <span style="font-size: 11px; color: #94a3b8; font-weight: 600;">{{ day.2 }}</span>
+                        </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in timetable_rows %}
+                        {% if row.is_break %}
+                        <!-- Строка: ПЕРЕРЫВ -->
+                        <tr class="break-row">
+                            <td class="time-col" style="font-size: 11px; opacity: 0.8;">
+                                {{ row.slot.start_str }} – {{ row.slot.end_str }}
+                            </td>
+                            {% for cell in row.cells %}
+                            <td colspan="1">
+                                <div class="break-cell">
+                                    <i class="fa-solid fa-mug-hot"></i> {{ cell.label }}
+                                </div>
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% else %}
+                        <!-- Строка: УРОК -->
+                        <tr>
+                            <td class="time-col">
+                                <div style="color: #60a5fa; font-size: 11px; margin-bottom: 2px;">Слот {{ row.slot.index }}</div>
+                                {{ row.slot.start_str }} – {{ row.slot.end_str }}
+                            </td>
+                            {% for cell in row.cells %}
+                            <td>
+                                {% if cell.type == 'busy' %}
+                                <!-- Занятый слот -->
+                                <div class="busy-slot-card" 
+                                     style="border-left-color: {{ cell.teacher.color|default:'#3b82f6' }};"
+                                     onclick="openLessonModal({{ cell.lesson.id }}, '{{ cell.group.name|escapejs }}', '{{ cell.group.subject|escapejs }}', '{{ cell.teacher.full_name|escapejs }}', '{{ cell.room|escapejs }}', '{{ cell.start_str }} - {{ cell.end_str }}', {{ cell.day_idx }}, {{ cell.students_count }})">
+                                    <div>
+                                        <div class="busy-group-name">
+                                            <span>{{ cell.group.name }}</span>
+                                            <span style="font-size: 10px; background: rgba(59,130,246,0.25); color: #93c5fd; padding: 1px 5px; border-radius: 4px;">
+                                                <i class="fa-solid fa-user-group"></i> {{ cell.students_count }}
+                                            </span>
+                                        </div>
+                                        <div class="busy-subject">{{ cell.group.subject }}</div>
+                                    </div>
+                                    <div class="busy-meta">
+                                        <span class="busy-teacher" title="{{ cell.teacher.full_name }}">
+                                            <i class="fa-solid fa-chalkboard-user"></i> {{ cell.teacher.full_name }}
+                                        </span>
+                                        <span class="busy-room">
+                                            <i class="fa-solid fa-location-dot"></i> {{ cell.room }}
+                                        </span>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <!-- Свободный слот (Free) -->
+                                <div class="free-slot-card" onclick="openQuickBookModal({{ cell.day_idx }}, '{{ cell.day_name|escapejs }}', '{{ cell.start_str }}', '{{ cell.end_str }}')">
+                                    <div class="free-badge">
+                                        <i class="fa-solid fa-plus-circle"></i> Свободно
+                                    </div>
+                                    <div class="free-subtext">Назначить группу</div>
+                                </div>
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО 1: Быстрое назначение группы на свободный слот -->
+    <div id="quickBookModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fa-solid fa-calendar-plus" style="color: #10b981;"></i>
+                    Назначить урок в слот
+                </h3>
+                <button type="button" class="modal-close" onclick="closeQuickBookModal()">&times;</button>
+            </div>
+
+            <!-- Контейнер для вывода ошибок / конфликтов -->
+            <div id="bookingConflictAlert" class="conflict-alert"></div>
+
+            <form id="quickBookForm" onsubmit="submitQuickBooking(event)">
+                <input type="hidden" id="bookDay" name="day_of_week">
+                <input type="hidden" id="bookStartTime" name="start_time">
+                <input type="hidden" id="bookEndTime" name="end_time">
+
+                <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 16px; font-size: 13px; color: var(--text-2);">
+                    <div>📅 День недели: <strong id="bookDayLabel" style="color: var(--text);">Понедельник</strong></div>
+                    <div style="margin-top: 4px;">⏰ Время слота: <strong id="bookTimeLabel" style="color: #34d399;">08:00 – 09:10</strong> ({{ settings.lesson_duration }} мин)</div>
+                </div>
+
+                <div class="form-row">
+                    <label class="form-label">Выберите группу *</label>
+                    <select id="bookGroupId" name="group_id" class="form-select" required onchange="onGroupSelectChange()">
+                        <option value="">-- Выберите группу --</option>
+                        {% for g in groups %}
+                        <option value="{{ g.id }}" data-teacher-id="{{ g.teacher_id|default:'' }}" data-teacher-name="{{ g.teacher.full_name|default:'' }}">
+                            {{ g.name }} — {{ g.subject }} {% if g.teacher %}(Учитель: {{ g.teacher.full_name }}){% endif %}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <label class="form-label">Преподаватель *</label>
+                    <select id="bookTeacherId" name="teacher_id" class="form-select" required>
+                        <option value="">-- Выберите преподавателя --</option>
+                        {% for t in teachers %}
+                        <option value="{{ t.id }}" {% if selected_teacher_id == t.id|stringformat:"s" %}selected{% endif %}>
+                            {{ t.full_name }} ({{ t.subjects }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <small style="color: #94a3b8; font-size: 11px; margin-top: 4px; display: block;">
+                        Если у группы уже закреплен учитель, он подставится автоматически.
+                    </small>
+                </div>
+
+                <div class="form-row">
+                    <label class="form-label">Аудитория / Кабинет (необязательно)</label>
+                    <input type="text" id="bookRoom" name="room" class="form-input" placeholder="Например: Кабинет 204 / Онлайн / IT-lab">
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-action btn-outline" onclick="closeQuickBookModal()">Отмена</button>
+                    <button type="submit" id="bookSubmitBtn" class="btn-action btn-primary" style="background: #10b981;">
+                        <i class="fa-solid fa-check"></i> Записать в расписание
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО 2: Детали урока (Просмотр, студенты, редактирование, удаление) -->
+    <div id="lessonDetailModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fa-solid fa-circle-info" style="color: #60a5fa;"></i>
+                    Детали урока
+                </h3>
+                <button type="button" class="modal-close" onclick="closeLessonModal()">&times;</button>
+            </div>
+
+            <div id="lessonEditConflictAlert" class="conflict-alert"></div>
+
+            <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+                <div style="font-size: 18px; font-weight: 800; color: #1e3a8a;" id="modalGroupName">PY-101 (Начинающие)</div>
+                <div style="font-size: 13px; color: #2563eb; font-weight: 600; margin-top: 2px;" id="modalSubject">Python & Алгоритмы</div>
+                <div style="display: flex; gap: 14px; margin-top: 10px; font-size: 12px; color: #334155; flex-wrap: wrap;">
+                    <span><i class="fa-solid fa-chalkboard-user" style="color: #60a5fa;"></i> <strong id="modalTeacherName">Алиев Сардор</strong></span>
+                    <span><i class="fa-regular fa-clock" style="color: #34d399;"></i> <strong id="modalTime">08:00 - 09:10</strong></span>
+                    <span><i class="fa-solid fa-location-dot" style="color: #fbbf24;"></i> <strong id="modalRoomDisplay">Кабинет 204</strong></span>
+                </div>
+            </div>
+
+            <!-- Редактирование аудитории и преподавателя -->
+            <div class="form-row">
+                <label class="form-label">Изменить аудиторию / кабинет</label>
+                <input type="text" id="modalEditRoom" class="form-input" placeholder="Кабинет 204">
+            </div>
+
+            <div class="form-row">
+                <label class="form-label">Сменить преподавателя урока (с проверкой на занятость)</label>
+                <select id="modalEditTeacher" class="form-select">
+                    {% for t in teachers %}
+                    <option value="{{ t.id }}">{{ t.full_name }} ({{ t.subjects }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Список учеников -->
+            <div style="margin-top: 16px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 12.5px; font-weight: 700; color: var(--text);">
+                        <i class="fa-solid fa-users"></i> Студенты группы (<span id="modalStudentsCount">0</span>):
+                    </span>
+                    <a href="{% url 'dashboard_groups' %}" style="font-size: 11.5px; color: #60a5fa; text-decoration: none;">
+                        + Добавить студента в группу
+                    </a>
+                </div>
+                <div class="students-roster">
+                    <p style="color: #9ca3af; font-size: 12px; margin: 0;">
+                        Список учащихся подгружен из карточки группы. Чтобы редактировать список студентов, перейдите во вкладку «Группы».
+                    </p>
+                </div>
+            </div>
+
+            <div class="modal-footer" style="justify-content: space-between;">
+                <button type="button" class="btn-action btn-outline" style="color: #f87171; border-color: rgba(248,113,113,0.3);" onclick="deleteCurrentLesson()">
+                    <i class="fa-solid fa-trash"></i> Удалить урок
+                </button>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" class="btn-action btn-outline" onclick="closeLessonModal()">Закрыть</button>
+                    <button type="button" class="btn-action btn-primary" onclick="saveLessonChanges()">
+                        <i class="fa-solid fa-save"></i> Сохранить
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Скрипты взаимодействия -->
+    <script>
+        let currentLessonId = null;
+
+        // Открытие модалки быстрого бронирования
+        function openQuickBookModal(dayIdx, dayName, startStr, endStr) {
+            document.getElementById('bookDay').value = dayIdx;
+            document.getElementById('bookStartTime').value = startStr;
+            document.getElementById('bookEndTime').value = endStr;
+            document.getElementById('bookDayLabel').innerText = dayName;
+            document.getElementById('bookTimeLabel').innerText = `${startStr} – ${endStr}`;
+            
+            document.getElementById('bookingConflictAlert').style.display = 'none';
+            document.getElementById('bookingConflictAlert').innerText = '';
+            document.getElementById('bookGroupId').value = '';
+            document.getElementById('bookRoom').value = '';
+
+            document.getElementById('quickBookModal').classList.add('active');
+        }
+
+        function closeQuickBookModal() {
+            document.getElementById('quickBookModal').classList.remove('active');
+        }
+
+        // Авто-подсшт.новка учителя при выборе группы
+        function onGroupSelectChange() {
+            const select = document.getElementById('bookGroupId');
+            const selectedOpt = select.options[select.selectedIndex];
+            const teacherId = selectedOpt.getAttribute('data-teacher-id');
+            if (teacherId) {
+                document.getElementById('bookTeacherId').value = teacherId;
+            }
+        }
+
+        // Отправка формы быстрого бронирования с проверкой конфликтов
+        async function submitQuickBooking(e) {
+            e.preventDefault();
+            const alertBox = document.getElementById('bookingConflictAlert');
+            const submitBtn = document.getElementById('bookSubmitBtn');
+            alertBox.style.display = 'none';
+
+            const payload = {
+                group_id: document.getElementById('bookGroupId').value,
+                teacher_id: document.getElementById('bookTeacherId').value,
+                day_of_week: document.getElementById('bookDay').value,
+                start_time: document.getElementById('bookStartTime').value,
+                end_time: document.getElementById('bookEndTime').value,
+                room: document.getElementById('bookRoom').value
+            };
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Проверка...';
+
+            try {
+                const response = await fetch("{% url 'api_schedule_create_lesson' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    alertBox.innerText = data.error || 'Произошла ошибка при создании урока.';
+                    alertBox.style.display = 'block';
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fa-solid fa-check"></i> Записать в расписание';
+                    return;
+                }
+
+                // Успешно добавлено - перезагрузка страницы для обновления сетки
+                window.location.reload();
+            } catch (err) {
+                alertBox.innerText = 'Сетевая ошибка при отправке запроса: ' + err.message;
+                alertBox.style.display = 'block';
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fa-solid fa-check"></i> Записать в расписание';
+            }
+        }
+
+        // Открытие карточки существующего урока
+        function openLessonModal(lessonId, groupName, subject, teacherName, room, timeStr, dayIdx, studentsCount) {
+            currentLessonId = lessonId;
+            document.getElementById('modalGroupName').innerText = groupName;
+            document.getElementById('modalSubject').innerText = subject;
+            document.getElementById('modalTeacherName').innerText = teacherName;
+            document.getElementById('modalTime').innerText = timeStr;
+            document.getElementById('modalRoomDisplay').innerText = room || 'Не указан';
+            document.getElementById('modalEditRoom').value = room || '';
+            document.getElementById('modalStudentsCount').innerText = studentsCount;
+            document.getElementById('lessonEditConflictAlert').style.display = 'none';
+
+            // Найти опцию преподавателя в селекте
+            const teacherSelect = document.getElementById('modalEditTeacher');
+            for (let i = 0; i < teacherSelect.options.length; i++) {
+                if (teacherSelect.options[i].text.includes(teacherName)) {
+                    teacherSelect.selectedIndex = i;
+                    break;
+                }
+            }
+
+            document.getElementById('lessonDetailModal').classList.add('active');
+        }
+
+        function closeLessonModal() {
+            document.getElementById('lessonDetailModal').classList.remove('active');
+        }
+
+        // Сохранить изменения урока
+        async function saveLessonChanges() {
+            if (!currentLessonId) return;
+            const alertBox = document.getElementById('lessonEditConflictAlert');
+            alertBox.style.display = 'none';
+
+            const payload = {
+                room: document.getElementById('modalEditRoom').value,
+                teacher_id: document.getElementById('modalEditTeacher').value
+            };
+
+            try {
+                const response = await fetch(`/api/schedule/lesson/${currentLessonId}/edit/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify(payload)
+                });
+                const data = await response.json();
+                if (!response.ok || !data.success) {
+                    alertBox.innerText = data.error || 'Ошибка при сохранении';
+                    alertBox.style.display = 'block';
+                    return;
+                }
+                window.location.reload();
+            } catch (err) {
+                alertBox.innerText = 'Ошибка соединения: ' + err.message;
+                alertBox.style.display = 'block';
+            }
+        }
+
+        // Удалить урок из расписания
+        async function deleteCurrentLesson() {
+            if (!currentLessonId) return;
+            if (!confirm('Вы уверены, что хотите удалить этот урок из расписания? Слот станет свободным.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/schedule/lesson/${currentLessonId}/delete/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert(data.error || 'Ошибка при удалении');
+                }
+            } catch (err) {
+                alert('Ошибка: ' + err.message);
+            }
+        }
+
+        // Получение CSRF токена
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Закрытие по клавише Esc
+        window.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeQuickBookModal();
+                closeLessonModal();
+            }
+        });
+    </script>
+</body>
+</html>
